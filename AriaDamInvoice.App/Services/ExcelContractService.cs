@@ -234,7 +234,7 @@ internal static class ExcelPdfExporter
             excel.ScreenUpdating = false;
             workbook = excel.Workbooks.Open(excelPath, ReadOnly: true);
             workbook.ForceFullCalculation = true;
-            workbook.CalculateFullRebuild();
+            excel.CalculateFullRebuild();
             workbook.ExportAsFixedFormat(0, pdfPath);
             workbook.Close(false);
             workbook = null;
