@@ -38,3 +38,10 @@ dotnet run --project AriaDamInvoice.App
 2. Save a contract as an editable Excel file.
 3. Export a matching PDF with variable-length tables and page layout.
 4. Browse, reopen, and edit previous contracts.
+
+
+## Fonts and dates
+- Persian text uses the Windows-installed **B Nazanin** font.
+- Numeric fields and calculated values use the Windows-installed **B Yekan** font.
+- Contract date entry uses the Solar Hijri calendar (Jalali), in `yyyy/MM/dd` format. Persian and Arabic-Indic digits are accepted; the date is validated and converted internally to a Gregorian `DateTime` for processing.
+- Both fonts should be installed on any Windows computer where the application is run. If they are missing, Windows will substitute another font.
