@@ -130,23 +130,60 @@ public sealed class ExcelContractService
         foreach (var address in new[] { "C3", "G3", "C4", "G4" })
             sheet.Cell(address).Style.Font.FontColor = XLColor.Black;
 
-        var documentLabel = sheet.Range("A1:H5").Cells()
-            .FirstOrDefault(cell => cell.GetString().Contains("شماره سند", StringComparison.Ordinal));
+        // Search the complete used range rather than assuming the label is inside A1:H5.
+        // This also supports templates whose header columns or merged cells were rearranged.
+        var usedRange = sheet.RangeUsed()
+            ?? throw new InvalidDataException("فایل اکسل مرجع خالی است یا محدوده استفاده‌شده ندارد.");
+
+        static string NormalizeLabel(string value)
+        {
+            return value
+                .Replace("ي", "ی")
+                .Replace("ك", "ک")
+                .Replace("\u200c", "")
+                .Replace(" ", "")
+                .Replace(":", "")
+                .Replace("：", "")
+                .Trim();
+        }
+
+        var documentLabel = usedRange.Cells()
+            .FirstOrDefault(cell =>
+                NormalizeLabel(cell.GetString()).Contains("شمارهسند", StringComparison.Ordinal));
+
         if (documentLabel is null)
             throw new InvalidDataException(
-                "عنوان «شماره سند» در فایل اکسل مرجع پیدا نشد. لطفاً فایل مرجع را بررسی کنید.");
+                "عنوان «شماره سند» در هیچ‌یک از سلول‌های فایل اکسل مرجع پیدا نشد. " +
+                "عبارت «شماره سند» را داخل یک سلول واقعی اکسل (نه Text Box) قرار دهید و فایل را ذخیره کنید.");
 
         var labelMerge = sheet.MergedRanges.FirstOrDefault(range =>
             range.RangeAddress.FirstAddress.RowNumber == documentLabel.Address.RowNumber &&
             range.RangeAddress.FirstAddress.ColumnNumber == documentLabel.Address.ColumnNumber);
-        var targetColumn = (labelMerge?.RangeAddress.LastAddress.ColumnNumber
-                            ?? documentLabel.Address.ColumnNumber) + 1;
-        if (targetColumn > 8)
-            targetColumn = documentLabel.Address.ColumnNumber - 1;
-        if (targetColumn < 1)
-            throw new InvalidDataException("برای درج شماره سند در فایل مرجع، سلول مناسبی در کنار عنوان آن وجود ندارد.");
+
+        var labelFirstColumn = labelMerge?.RangeAddress.FirstAddress.ColumnNumber
+                               ?? documentLabel.Address.ColumnNumber;
+        var labelLastColumn = labelMerge?.RangeAddress.LastAddress.ColumnNumber
+                              ?? documentLabel.Address.ColumnNumber;
+        var lastUsedColumn = usedRange.RangeAddress.LastAddress.ColumnNumber;
+
+        // Prefer the cell immediately to the left of the label; if the label is
+        // already at the left edge, use the first cell after its merged range.
+        var targetColumn = labelFirstColumn > 1
+            ? labelFirstColumn - 1
+            : labelLastColumn + 1;
+
+        if (targetColumn > sheet.ColumnCount())
+            throw new InvalidDataException(
+                "در کنار عنوان شماره سند فضای کافی برای درج شماره وجود ندارد. فایل مرجع را اصلاح کنید.");
 
         var numberCell = sheet.Cell(documentLabel.Address.RowNumber, targetColumn);
+        var numberMerge = sheet.MergedRanges.FirstOrDefault(range =>
+            range.Contains(numberCell));
+        if (numberMerge is not null)
+            numberCell = sheet.Cell(
+                numberMerge.RangeAddress.FirstAddress.RowNumber,
+                numberMerge.RangeAddress.FirstAddress.ColumnNumber);
+
         numberCell.Value = data.DocumentNumber.ToString(CultureInfo.InvariantCulture);
         numberCell.Style.Font.FontColor = XLColor.Black;
         numberCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
