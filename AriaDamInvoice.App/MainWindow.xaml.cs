@@ -1,10 +1,10 @@
 using System.IO;
 using System.Windows;
-using AriaDamInvoice.App.Models;
-using AriaDamInvoice.App.Services;
+using AriaDamInvoice.Models;
+using AriaDamInvoice.Services;
 using Microsoft.Win32;
 
-namespace AriaDamInvoice.App;
+namespace AriaDamInvoice;
 
 public partial class MainWindow : Window
 {
@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
         _settings = _settingsService.Load();
 
         if (Directory.Exists(_settings.OutputDirectory))
@@ -58,14 +59,19 @@ public partial class MainWindow : Window
         SaveFolderButton.IsEnabled = Directory.Exists(_selectedFolder);
     }
 
-    private void ChooseFolder_Click(object sender, RoutedEventArgs e) => SelectOutputFolder();
+    private void ChooseFolder_Click(object sender, RoutedEventArgs e) =>
+        SelectOutputFolder();
 
     private void SaveFolder_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(_selectedFolder) || !Directory.Exists(_selectedFolder))
+        if (string.IsNullOrWhiteSpace(_selectedFolder) ||
+            !Directory.Exists(_selectedFolder))
         {
-            MessageBox.Show("ابتدا یک پوشه معتبر انتخاب کنید.", "پوشه ذخیره‌سازی",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(
+                "ابتدا یک پوشه معتبر انتخاب کنید.",
+                "پوشه ذخیره‌سازی",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
             return;
         }
 
@@ -75,6 +81,7 @@ public partial class MainWindow : Window
     private void ChangeFolder_Click(object sender, RoutedEventArgs e)
     {
         SelectOutputFolder();
+
         if (!string.IsNullOrWhiteSpace(_selectedFolder))
             SaveSelectedFolderAndShowDashboard();
     }
@@ -89,20 +96,29 @@ public partial class MainWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            MessageBox.Show($"ذخیره محل خروجی انجام نشد.\n{ex.Message}", "خطا",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(
+                $"ذخیره محل خروجی انجام نشد.\n{ex.Message}",
+                "خطا",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 
     private void NewInvoice_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("بخش صدور قرارداد در مرحله بعدی توسعه می‌شود.", "صدور قرارداد جدید",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(
+            "بخش صدور قرارداد در مرحله بعدی توسعه می‌شود.",
+            "صدور قرارداد جدید",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void PreviousInvoices_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("بخش مشاهده و ویرایش قراردادهای قبلی در مرحله بعدی توسعه می‌شود.", "قراردادهای قبلی",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(
+            "بخش مشاهده و ویرایش قراردادهای قبلی در مرحله بعدی توسعه می‌شود.",
+            "قراردادهای قبلی",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 }
