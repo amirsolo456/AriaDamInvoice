@@ -170,7 +170,7 @@ public sealed class ExcelContractService
             ? labelFirstColumn - 1
             : labelLastColumn + 1;
 
-        if (targetColumn > sheet.ColumnCount())
+        if (targetColumn > 16_384)
             throw new InvalidDataException(
                 "در کنار عنوان شماره سند فضای کافی برای درج شماره وجود ندارد. فایل مرجع را اصلاح کنید.");
 
