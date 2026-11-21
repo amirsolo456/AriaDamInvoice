@@ -248,10 +248,63 @@ public partial class InvoiceWindow : Window
             return;
         }
 
-        MessageBox.Show(
-            $"تاریخ شمسی قرارداد: {FormatPersianDate(contractDate)}\nاتصال ذخیره‌سازی اکسل و تولید PDF در مرحله بعد انجام می‌شود.",
-            "اطلاعات قرارداد",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        AnimalsGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+        AnimalsGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+        var animals = _animals
+            .Where(x => x.Count > 0 || x.Weight != 0 ||
+                        !string.IsNullOrWhiteSpace(x.AnimalType) ||
+                        !string.IsNullOrWhiteSpace(x.Breed) ||
+                        x.UnitPrice != 0 ||
+                        !string.IsNullOrWhiteSpace(x.Description))
+            .ToList();
+
+        if (animals.Count == 0)
+        {
+            MessageBox.Show(
+                "حداقل مشخصات یک ردیف دام را وارد کنید.",
+                "اطلاعات قرارداد",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            AnimalsGrid.Focus();
+            return;
+        }
+
+        var tags = EarTagsTextBox.Text
+            .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .Where(x => x.Length > 0)
+            .ToList();
+
+        try
+        {
+            var data = new InvoiceData
+            {
+                ContractDate = FormatPersianDate(contractDate),
+                BuyerName = BuyerNameTextBox.Text.Trim(),
+                Phone = PhoneTextBox.Text.Trim(),
+                Address = AddressTextBox.Text.Trim(),
+                Animals = animals,
+                EarTags = tags
+            };
+
+            var service = new ExcelContractService();
+            var result = service.Create(data, _settings.OutputDirectory);
+
+            MessageBox.Show(
+                $"قرارداد با موفقیت ذخیره شد.\n\nفایل اکسل:\n{result.ExcelPath}\n\nفایل PDF:\n{result.PdfPath}",
+                "صدور قرارداد",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            Close();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"صدور قرارداد با خطا مواجه شد:\n{ex.Message}",
+                "خطا در صدور قرارداد",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 }
