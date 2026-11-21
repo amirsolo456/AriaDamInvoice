@@ -36,7 +36,7 @@
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Margin="4,0,4,14">
             <TextBlock Text="صدور قرارداد فروش دام" FontSize="23" FontWeight="Bold" Foreground="{StaticResource BrandDarkBrush}"/>
-            <TextBlock Text="اطلاعات خریدار و مشخصات دام را وارد کنید." Margin="0,5,0,0" Foreground="{StaticResource MutedBrush}"/>
+            <TextBlock Text="اطلاعات قرارداد" Margin="0,5,0,0" Foreground="{StaticResource MutedBrush}"/>
         </StackPanel>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
@@ -55,9 +55,9 @@
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock Text="مشخصات دام" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <Button Content="حذف ردیف انتخاب‌شده" Click="RemoveAnimal_Click" Margin="4,0" Background="#FEE2E2" Foreground="#991B1B"/>
-                                <Button Content="افزودن نژاد جدید" Click="AddBreed_Click" Margin="4,0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}"/>
-                                <Button Content="+ افزودن ردیف دام" Click="AddAnimal_Click" Margin="4,0" Background="{StaticResource BrandBrush}" Foreground="White"/>
+                                <Button Click="RemoveAnimal_Click" Margin="4,0" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف ردیف انتخاب‌شده" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="حذف"/></StackPanel></Button>
+                                <Button Click="AddBreed_Click" Margin="4,0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="افزودن گزینه نژاد" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="نژاد"/></StackPanel></Button>
+                                <Button Click="AddAnimal_Click" Margin="4,0" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن ردیف دام" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="افزودن دام"/></StackPanel></Button>
                             </StackPanel>
                         </DockPanel>
                         <DataGrid x:Name="AnimalsGrid" FontFamily="B Nazanin" AutoGenerateColumns="False" CanUserAddRows="False"
@@ -96,14 +96,11 @@
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock Text="پلاک گوش دام ارسالی" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <Button Content="حذف پلاک انتخاب‌شده" Click="RemoveEarTag_Click"
-                                        Background="#FEE2E2" Foreground="#991B1B"/>
-                                <Button Content="+ افزودن پلاک" Click="AddEarTag_Click"
-                                        Background="{StaticResource BrandBrush}" Foreground="White"/>
+                                <Button Click="RemoveEarTag_Click" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف پلاک انتخاب‌شده" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="حذف"/></StackPanel></Button>
+                                <Button Click="AddEarTag_Click" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن پلاک گوش" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="افزودن پلاک"/></StackPanel></Button>
                             </StackPanel>
                         </DockPanel>
-                        <TextBlock Text="هر پلاک در یک ردیف جداگانه ثبت می‌شود. تعداد ردیف‌ها به‌صورت خودکار تنظیم می‌شود."
-                                   Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8"/>
+                        <TextBlock Text="هر پلاک در یک ردیف" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8"/>
                         <DataGrid x:Name="EarTagsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                                   SelectionMode="Single" MinHeight="110" MaxHeight="260"
@@ -122,11 +119,9 @@
             </StackPanel>
         </ScrollViewer>
         <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <Button Content="انصراف" DockPanel.Dock="Left" Click="Cancel_Click" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}"/>
-            <Button Content="ذخیره و تولید قرارداد" DockPanel.Dock="Right" Background="{StaticResource BrandBrush}"
-                    Foreground="White" Click="Save_Click"/>
-            <TextBlock Text="فایل اکسل و PDF در پوشه انتخاب‌شده ذخیره می‌شوند." VerticalAlignment="Center"
-                       Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0"/>
+            <Button DockPanel.Dock="Left" Click="Cancel_Click" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="بستن بدون ذخیره"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0"/><TextBlock Text="بستن"/></StackPanel></Button>
+            <Button DockPanel.Dock="Right" Background="{StaticResource BrandBrush}" Foreground="White" Click="Save_Click" ToolTip="ذخیره اکسل و تولید PDF"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0"/><TextBlock Text="تولید قرارداد"/></StackPanel></Button>
+            <TextBlock Text="Excel + PDF" FontFamily="B Yekan" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0"/>
         </DockPanel>
     </Grid>
 </Window>
