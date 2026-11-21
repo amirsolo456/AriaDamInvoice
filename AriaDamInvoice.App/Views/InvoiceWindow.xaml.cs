@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -13,6 +15,7 @@ namespace AriaDamInvoice.Views;
 public partial class InvoiceWindow : Window
 {
     private readonly ObservableCollection<AnimalLine> _animals = new();
+    private readonly ObservableCollection<EarTagEntry> _earTags = new();
     private readonly ObservableCollection<string> _breedOptions = new();
     private readonly PersianCalendar _persianCalendar = new();
     private readonly SettingsService _settingsService = new();
@@ -38,8 +41,9 @@ public partial class InvoiceWindow : Window
         if (_settings.NextDocumentNumber < 1000) _settings.NextDocumentNumber = 1000;
         DocumentNumberTextBox.Text = _settings.NextDocumentNumber.ToString(CultureInfo.InvariantCulture);
         AnimalsGrid.ItemsSource = _animals;
+        EarTagsGrid.ItemsSource = _earTags;
         AddAnimalRow();
-        EarTagsTextBox.TextChanged += (_, _) => UpdateEarTagCount();
+        AddEarTagRow();
     }
 
     private string FormatPersianDate(DateTime date) =>
@@ -138,6 +142,44 @@ public partial class InvoiceWindow : Window
         {
             return false;
         }
+    }
+
+    private void AddEarTagRow()
+    {
+        var entry = new EarTagEntry { RowNumber = _earTags.Count + 1 };
+        entry.PropertyChanged += (_, _) => UpdateEarTagCount();
+        _earTags.Add(entry);
+        UpdateEarTagCount();
+    }
+
+    private void AddEarTag_Click(object sender, RoutedEventArgs e)
+    {
+        AddEarTagRow();
+        EarTagsGrid.SelectedItem = _earTags.LastOrDefault();
+        if (EarTagsGrid.SelectedItem is not null)
+        {
+            EarTagsGrid.ScrollIntoView(EarTagsGrid.SelectedItem);
+            EarTagsGrid.BeginEdit();
+        }
+    }
+
+    private void RemoveEarTag_Click(object sender, RoutedEventArgs e)
+    {
+        if (EarTagsGrid.SelectedItem is not EarTagEntry selected)
+        {
+            MessageBox.Show(this, "ابتدا یک ردیف پلاک را انتخاب کنید.", "پلاک گوش",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        _earTags.Remove(selected);
+        for (var i = 0; i < _earTags.Count; i++)
+            _earTags[i].RowNumber = i + 1;
+
+        if (_earTags.Count == 0)
+            AddEarTagRow();
+        else
+            UpdateEarTagCount();
     }
 
     private void AddAnimalRow()
@@ -270,13 +312,10 @@ public partial class InvoiceWindow : Window
 
     private void UpdateEarTagCount()
     {
-        var count = EarTagsTextBox.Text
-            .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
-            .Select(x => x.Trim())
-            .Count(x => x.Length > 0);
+        var count = _earTags.Count(x => !string.IsNullOrWhiteSpace(x.Tag));
 
         EarTagCountText.Inlines.Clear();
-        EarTagCountText.Inlines.Add(new Run("تعداد پلاک: ") { FontFamily = new FontFamily("B Nazanin") });
+        EarTagCountText.Inlines.Add(new Run("تعداد پلاک ثبت‌شده: ") { FontFamily = new FontFamily("B Nazanin") });
         EarTagCountText.Inlines.Add(new Run(count.ToString("N0"))
         {
             FontFamily = new FontFamily("B Yekan")
@@ -310,6 +349,8 @@ public partial class InvoiceWindow : Window
 
         AnimalsGrid.CommitEdit(DataGridEditingUnit.Cell, true);
         AnimalsGrid.CommitEdit(DataGridEditingUnit.Row, true);
+        EarTagsGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+        EarTagsGrid.CommitEdit(DataGridEditingUnit.Row, true);
 
         var animals = _animals
             .Where(x => x.Count > 0 || x.Weight != 0 ||
@@ -330,10 +371,10 @@ public partial class InvoiceWindow : Window
             return;
         }
 
-        var tags = EarTagsTextBox.Text
-            .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
-            .Select(x => x.Trim())
-            .Where(x => x.Length > 0)
+        var tags = _earTags
+            .Select(x => x.Tag?.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x!)
             .ToList();
 
         try
@@ -371,4 +412,24 @@ public partial class InvoiceWindow : Window
                 MessageBoxImage.Error);
         }
     }
+    private sealed class EarTagEntry : INotifyPropertyChanged
+    {
+        private string _tag = string.Empty;
+
+        public int RowNumber { get; set; }
+
+        public string Tag
+        {
+            get => _tag;
+            set
+            {
+                if (_tag == value) return;
+                _tag = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tag)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+    }
+
 }
