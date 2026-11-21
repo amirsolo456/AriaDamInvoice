@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     private readonly SettingsService _settingsService = new();
     private AppSettings _settings;
     private string _selectedFolder = string.Empty;
+    private string _selectedTemplate = string.Empty;
 
     public MainWindow()
     {
@@ -19,7 +20,7 @@ public partial class MainWindow : Window
 
         _settings = _settingsService.Load();
 
-        if (Directory.Exists(_settings.OutputDirectory))
+        if (Directory.Exists(_settings.OutputDirectory) && File.Exists(_settings.TemplateFilePath))
             ShowDashboard();
         else
             ShowFolderSetup();
@@ -30,6 +31,7 @@ public partial class MainWindow : Window
         DashboardPanel.Visibility = Visibility.Collapsed;
         SetupPanel.Visibility = Visibility.Visible;
         SelectedFolderText.Text = string.Empty;
+        SelectedTemplateText.Text = string.Empty;
         SaveFolderButton.IsEnabled = false;
         _selectedFolder = string.Empty;
     }
@@ -39,7 +41,34 @@ public partial class MainWindow : Window
         SetupPanel.Visibility = Visibility.Collapsed;
         DashboardPanel.Visibility = Visibility.Visible;
         OutputFolderText.Text = _settings.OutputDirectory;
+        TemplateFileText.Text = _settings.TemplateFilePath;
     }
+
+    private void SelectTemplateFile()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "فایل اکسل مرجع قرارداد را انتخاب کنید",
+            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+            CheckFileExists = true,
+            Multiselect = false
+        };
+
+        if (File.Exists(_settings.TemplateFilePath))
+            dialog.InitialDirectory = Path.GetDirectoryName(_settings.TemplateFilePath);
+
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        _selectedTemplate = dialog.FileName;
+        SelectedTemplateText.Text = _selectedTemplate;
+        UpdateSetupSaveButton();
+    }
+
+    private void UpdateSetupSaveButton() =>
+        SaveFolderButton.IsEnabled = Directory.Exists(_selectedFolder) && File.Exists(_selectedTemplate);
+
+    private void ChooseTemplate_Click(object sender, RoutedEventArgs e) => SelectTemplateFile();
 
     private void SelectOutputFolder()
     {
@@ -57,19 +86,35 @@ public partial class MainWindow : Window
 
         _selectedFolder = dialog.FolderName;
         SelectedFolderText.Text = _selectedFolder;
-        SaveFolderButton.IsEnabled = Directory.Exists(_selectedFolder);
+        UpdateSetupSaveButton();
     }
 
     private void ChooseFolder_Click(object sender, RoutedEventArgs e) =>
         SelectOutputFolder();
 
+    private void ChangeTemplate_Click(object sender, RoutedEventArgs e)
+    {
+        SelectTemplateFile();
+        if (string.IsNullOrWhiteSpace(_selectedTemplate)) return;
+        try
+        {
+            _settings.TemplateFilePath = _selectedTemplate;
+            _settingsService.Save(_settings);
+            TemplateFileText.Text = _settings.TemplateFilePath;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"ذخیره مسیر فایل مرجع انجام نشد.\\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void SaveFolder_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_selectedFolder) ||
-            !Directory.Exists(_selectedFolder))
+            !Directory.Exists(_selectedFolder) || string.IsNullOrWhiteSpace(_selectedTemplate) || !File.Exists(_selectedTemplate))
         {
             MessageBox.Show(
-                "ابتدا یک پوشه معتبر انتخاب کنید.",
+                "ابتدا پوشه ذخیره‌سازی و فایل اکسل مرجع را انتخاب کنید.",
                 "پوشه ذخیره‌سازی",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -92,6 +137,7 @@ public partial class MainWindow : Window
         try
         {
             _settings.OutputDirectory = _selectedFolder;
+            _settings.TemplateFilePath = _selectedTemplate;
             _settingsService.Save(_settings);
             ShowDashboard();
         }
