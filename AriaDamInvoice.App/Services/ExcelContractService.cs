@@ -210,13 +210,14 @@ public sealed class ExcelContractService
             }
 
             var animal = animals[index];
-            sheet.Range(row, 1, row, 7).Style.Font.FontColor = XLColor.Black;
+            sheet.Range(row, 1, row, 8).Style.Font.FontColor = XLColor.Black;
             sheet.Cell(row, 2).Value = animal.Count;
             sheet.Cell(row, 3).Value = animal.Weight;
             sheet.Cell(row, 4).Value = animal.AnimalType;
             sheet.Cell(row, 5).Value = animal.Breed;
             sheet.Cell(row, 6).Value = animal.UnitPrice;
             sheet.Cell(row, 7).FormulaA1 = $"=IF(OR(B{row}=\"\",F{row}=\"\"),\"\",B{row}*F{row})";
+            sheet.Cell(row, 8).Value = animal.Description;
             sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
             sheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
         }
