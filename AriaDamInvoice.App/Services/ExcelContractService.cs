@@ -87,11 +87,36 @@ public sealed class ExcelContractService
 
         ExcelPdfExporter.ExportWorkbook(excelPath, pdfPath);
 
-        Process.Start(new ProcessStartInfo
+        // Opening the PDF is a convenience step only. The invoice is already
+        // successfully created at this point, so a missing PDF viewer must not
+        // make the whole operation look like a failed invoice generation.
+        try
         {
-            FileName = pdfPath,
-            UseShellExecute = true
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = pdfPath,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception)
+        {
+            // If Windows has no default PDF application (or its association is
+            // broken), open Explorer and select the generated PDF instead.
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\\"{pdfPath}\\"",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception)
+            {
+                // Keep the successfully generated Excel/PDF files; do not
+                // report a generation failure just because auto-open failed.
+            }
+        }
 
         return (excelPath, pdfPath);
     }
