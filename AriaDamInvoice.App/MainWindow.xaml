@@ -4,8 +4,8 @@
         Title="آریا دام خاتون | مدیریت قراردادها"
         Width="960" Height="640" MinWidth="640" MinHeight="480"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
-        FlowDirection="RightToLeft" Background="{StaticResource PageBrush}">
-    <Grid Margin="16">
+        FlowDirection="LeftToRight" Background="{StaticResource PageBrush}">
+    <Grid Margin="16" FlowDirection="RightToLeft">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
