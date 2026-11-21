@@ -45,3 +45,11 @@ dotnet run --project AriaDamInvoice.App
 - Numeric fields and calculated values use the Windows-installed **B Yekan** font.
 - Contract date entry uses the Solar Hijri calendar (Jalali), in `yyyy/MM/dd` format. Persian and Arabic-Indic digits are accepted; the date is validated and converted internally to a Gregorian `DateTime` for processing.
 - Both fonts should be installed on any Windows computer where the application is run. If they are missing, Windows will substitute another font.
+
+
+## Fixed livestock sale obligations
+The contract entry screen no longer asks the user to enter free-form contract notes. The fixed legal/obligations section is defined in `Models/ContractText.cs`:
+- Excel section title: `تعهدات و بند قوانین فروش دام زنده`
+- Body: the fixed text in `ContractText.ObligationsBody`
+
+When the Excel template population step is implemented, this constant must be written into the matching obligations area in the reference workbook. The reference Excel template is not currently stored in this repository, so the workbook itself has not yet been edited.
