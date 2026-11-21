@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="صدور قرارداد جدید" Width="1120" Height="820"
         MinWidth="760" MinHeight="600" WindowStartupLocation="CenterOwner"
-        FlowDirection="RightToLeft" Background="{StaticResource PageBrush}">
+        FlowDirection="RightToLeft" Background="{StaticResource PageBrush}" TextElement.FontFamily="B Nazanin">
     <Grid Margin="16">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Margin="4,0,4,14">
@@ -15,9 +15,9 @@
                 <Border Background="White" CornerRadius="10" Padding="16" Margin="0,0,0,12">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="4"><TextBlock Text="تاریخ قرارداد"/><DatePicker x:Name="ContractDatePicker" Margin="0,6,0,0"/></StackPanel>
+                        <StackPanel Grid.Column="0" Margin="4"><TextBlock Text="تاریخ قرارداد (شمسی)"/><TextBox x:Name="ContractDateTextBox" Margin="0,6,0,0" Padding="7" FontFamily="B Yekan" FlowDirection="LeftToRight" TextAlignment="Center" ToolTip="مثال: ۱۴۰۵/۰۸/۳۰"/><TextBlock Text="فرمت: سال/ماه/روز" FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0"/></StackPanel>
                         <StackPanel Grid.Column="1" Margin="4"><TextBlock Text="نام خریدار"/><TextBox x:Name="BuyerNameTextBox" Margin="0,6,0,0" Padding="7"/></StackPanel>
-                        <StackPanel Grid.Column="2" Margin="4"><TextBlock Text="تلفن"/><TextBox x:Name="PhoneTextBox" Margin="0,6,0,0" Padding="7"/></StackPanel>
+                        <StackPanel Grid.Column="2" Margin="4"><TextBlock Text="تلفن"/><TextBox x:Name="PhoneTextBox" Margin="0,6,0,0" Padding="7" FontFamily="B Yekan"/></StackPanel>
                         <StackPanel Grid.Column="3" Margin="4"><TextBlock Text="آدرس"/><TextBox x:Name="AddressTextBox" Margin="0,6,0,0" Padding="7"/></StackPanel>
                     </Grid>
                 </Border>
@@ -30,17 +30,17 @@
                                 <Button Content="+ افزودن ردیف دام" Click="AddAnimal_Click" Margin="4,0" Background="{StaticResource BrandBrush}" Foreground="White"/>
                             </StackPanel>
                         </DockPanel>
-                        <DataGrid x:Name="AnimalsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                        <DataGrid x:Name="AnimalsGrid" FontFamily="B Nazanin" AutoGenerateColumns="False" CanUserAddRows="False"
                                   MinHeight="180" MaxHeight="360" HeadersVisibility="Column"
                                   GridLinesVisibility="Horizontal" SelectionMode="Single">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ردیف" Binding="{Binding RowNumber}" IsReadOnly="True" Width="55"/>
-                                <DataGridTextColumn Header="تعداد" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" Width="75"/>
-                                <DataGridTextColumn Header="وزن" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="85"/>
+                                <DataGridTextColumn Header="ردیف" Binding="{Binding RowNumber}" IsReadOnly="True" Width="55" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
+                                <DataGridTextColumn Header="تعداد" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" Width="75" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
+                                <DataGridTextColumn Header="وزن" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="85" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="نوع دام" Binding="{Binding AnimalType, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                                 <DataGridTextColumn Header="نژاد" Binding="{Binding Breed, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                <DataGridTextColumn Header="قیمت واحد" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
-                                <DataGridTextColumn Header="جمع کل" Binding="{Binding LineTotal}" IsReadOnly="True" Width="110"/>
+                                <DataGridTextColumn Header="قیمت واحد" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
+                                <DataGridTextColumn Header="جمع کل" Binding="{Binding LineTotal}" IsReadOnly="True" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="توضیح" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -53,7 +53,7 @@
                         <TextBlock Text="پلاک گوش دام ارسالی" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                         <TextBlock Text="هر پلاک را در یک خط وارد کنید؛ تعداد پلاک‌ها مستقل از تعداد ردیف‌های دام است."
                                    Foreground="{StaticResource MutedBrush}" Margin="0,5,0,8"/>
-                        <TextBox x:Name="EarTagsTextBox" MinHeight="90" AcceptsReturn="True" TextWrapping="Wrap"
+                        <TextBox x:Name="EarTagsTextBox" FontFamily="B Yekan" MinHeight="90" AcceptsReturn="True" TextWrapping="Wrap"
                                  VerticalScrollBarVisibility="Auto" Padding="8"/>
                         <TextBlock x:Name="EarTagCountText" Text="تعداد پلاک: ۰" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0"/>
                     </StackPanel>
