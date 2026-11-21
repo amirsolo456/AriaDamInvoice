@@ -68,6 +68,48 @@ public partial class InvoiceWindow : Window
         return new string(chars);
     }
 
+    private bool TryReadCurrentDocumentNumber(out int number)
+    {
+        var normalized = NormalizeDigits(DocumentNumberTextBox.Text);
+        return int.TryParse(normalized, NumberStyles.None, CultureInfo.InvariantCulture, out number)
+               && number >= 1 && number < int.MaxValue;
+    }
+
+    private void IncreaseDocumentNumber_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryReadCurrentDocumentNumber(out var number))
+        {
+            MessageBox.Show(this, "ابتدا یک شماره سند معتبر وارد کنید.", "شماره سند",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            DocumentNumberTextBox.Focus();
+            DocumentNumberTextBox.SelectAll();
+            return;
+        }
+
+        DocumentNumberTextBox.Text = (number + 1).ToString(CultureInfo.InvariantCulture);
+    }
+
+    private void DecreaseDocumentNumber_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryReadCurrentDocumentNumber(out var number))
+        {
+            MessageBox.Show(this, "ابتدا یک شماره سند معتبر وارد کنید.", "شماره سند",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            DocumentNumberTextBox.Focus();
+            DocumentNumberTextBox.SelectAll();
+            return;
+        }
+
+        if (number == 1)
+        {
+            MessageBox.Show(this, "شماره سند نمی‌تواند کمتر از ۱ باشد.", "شماره سند",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        DocumentNumberTextBox.Text = (number - 1).ToString(CultureInfo.InvariantCulture);
+    }
+
     private bool TryGetDocumentNumber(out int documentNumber)
     {
         var normalized = NormalizeDigits(DocumentNumberTextBox.Text);
