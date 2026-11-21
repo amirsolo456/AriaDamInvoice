@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using AriaDamInvoice.Models;
 using AriaDamInvoice.Services;
+using AriaDamInvoice.Views;
 using Microsoft.Win32;
 
 namespace AriaDamInvoice;
@@ -106,11 +107,12 @@ public partial class MainWindow : Window
 
     private void NewInvoice_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show(
-            "بخش صدور قرارداد در مرحله بعدی توسعه می‌شود.",
-            "صدور قرارداد جدید",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        var window = new InvoiceWindow
+        {
+            Owner = this
+        };
+
+        window.ShowDialog();
     }
 
     private void PreviousInvoices_Click(object sender, RoutedEventArgs e)
