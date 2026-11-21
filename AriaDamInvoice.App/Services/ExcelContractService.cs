@@ -244,7 +244,19 @@ internal static class ExcelPdfExporter
             workbook = excel.Workbooks.Open(excelPath, ReadOnly: true);
             workbook.ForceFullCalculation = true;
             excel.CalculateFullRebuild();
-            workbook.ExportAsFixedFormat(0, pdfPath);
+
+            // Export only the contract worksheet; the reference workbook may contain
+            // a separate back-side worksheet that must not become page 2 of the PDF.
+            dynamic contractSheet = workbook.Worksheets("قرارداد فروش دام");
+            dynamic pageSetup = contractSheet.PageSetup;
+            pageSetup.PaperSize = 9;          // xlPaperA4
+            pageSetup.Orientation = 1;        // xlPortrait
+            pageSetup.Zoom = false;
+            pageSetup.FitToPagesWide = 1;
+            pageSetup.FitToPagesTall = 1;
+            contractSheet.ExportAsFixedFormat(0, pdfPath);
+            Marshal.FinalReleaseComObject(pageSetup);
+            Marshal.FinalReleaseComObject(contractSheet);
             workbook.Close(false);
             workbook = null;
         }
