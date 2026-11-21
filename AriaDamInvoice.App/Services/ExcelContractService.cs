@@ -11,8 +11,12 @@ public sealed class ExcelContractService
     private const int InitialAnimalRows = 10;
     private const int FirstEarTagRow = 27;
     private const int InitialEarTagRows = 5;
-    private readonly string _templatePath = Path.Combine(
-        AppContext.BaseDirectory, "Templates", "InvoiceTemplate.xlsx");
+    private readonly string _templatePath;
+
+    public ExcelContractService(string templatePath)
+    {
+        _templatePath = templatePath;
+    }
 
     public (string ExcelPath, string PdfPath) Create(InvoiceData data, string outputDirectory)
     {
@@ -38,7 +42,6 @@ public sealed class ExcelContractService
             FillAnimalRows(sheet, data.Animals, summaryRow);
             var signatureRow = ResizeEarTagRows(sheet, data.EarTags, data.Animals.Count);
             FillObligationsOnFront(sheet, data.Animals.Count);
-            FillBackPage(workbook.Worksheet("پشت فاکتور"));
 
             var lastRow = signatureRow + 4;
             sheet.PageSetup.PrintAreas.Clear();
@@ -46,19 +49,11 @@ public sealed class ExcelContractService
             sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
             sheet.PageSetup.PaperSize = XLPaperSize.A4Paper;
             sheet.PageSetup.PagesWide = 1;
-            sheet.PageSetup.PagesTall = 0;
+            sheet.PageSetup.PagesTall = 1;
             sheet.PageSetup.Margins.Top = 0.35;
             sheet.PageSetup.Margins.Bottom = 0.35;
             sheet.PageSetup.Margins.Left = 0.35;
             sheet.PageSetup.Margins.Right = 0.35;
-
-            var back = workbook.Worksheet("پشت فاکتور");
-            back.PageSetup.PrintAreas.Clear();
-            back.PageSetup.PrintAreas.Add("A1:H19");
-            back.PageSetup.PageOrientation = XLPageOrientation.Portrait;
-            back.PageSetup.PaperSize = XLPaperSize.A4Paper;
-            back.PageSetup.PagesWide = 1;
-            back.PageSetup.PagesTall = 1;
 
             workbook.SaveAs(excelPath);
         }
@@ -192,42 +187,6 @@ public sealed class ExcelContractService
         body.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
         for (var row = bodyStart; row <= bodyEnd; row++)
             sheet.Row(row).Height = 34;
-    }
-
-    private static void FillBackPage(IXLWorksheet sheet)
-    {
-        sheet.Cell("A2").Value = ContractText.ObligationsTitle;
-        sheet.Cell("A3").Value =
-            "کلیه نژاد دام های قید شده در ستون نژاد دام طبق شماره پلاک گوش دارای گواهی ژنتیک از آزمایشگاه می باشند.";
-        sheet.Cell("A5").Value =
-            "بند اول:دام در هنگام خروج از مجموعه سالم بوده و مسئولیت ان بعد از خروج بر عهده خریدار میباشد.";
-        sheet.Cell("A8").Value =
-            "بند دوم:خریدار موظف بوده برای حمل دام مجوزات لازم را اخذ نماید و مسئولیت ان بر عهده فروشنده نمیباشد.";
-        sheet.Cell("A11").Value =
-            "بند سوم:برای رعایت مسائل بهداشتی پس از خروج دام از مجموعه،به هیچ عنوان مرجوع یا تعویض نمیگردد.";
-        sheet.Cell("A14").Value =
-            "بند چهارم:ابستن بودن دام بعد از رویت و سونوگرافی مشتری ارسال میشود و به هر دلیل بعد از ارسال مسئولیت ان برعهده فروشنده نمیباشد.";
-        sheet.Cell("A18").Value = "انشا الله خداوند به طرفین خیر و برکت عنایت فرماید.";
-
-        foreach (var cell in new[] { "A2", "A3", "A5", "A8", "A11", "A14", "A18" })
-        {
-            sheet.Cell(cell).Style.Font.FontName = "B Nazanin";
-            sheet.Cell(cell).Style.Alignment.WrapText = true;
-            sheet.Cell(cell).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        }
-
-        sheet.Row(3).Height = 38;
-        sheet.Row(5).Height = 30;
-        sheet.Row(6).Height = 30;
-        sheet.Row(8).Height = 30;
-        sheet.Row(9).Height = 30;
-        sheet.Row(11).Height = 30;
-        sheet.Row(12).Height = 30;
-        sheet.Row(14).Height = 30;
-        sheet.Row(15).Height = 30;
-        sheet.Row(16).Height = 30;
-        sheet.Row(18).Height = 30;
-        sheet.Row(19).Height = 30;
     }
 
     private static string MakeSafeFileName(string value)
