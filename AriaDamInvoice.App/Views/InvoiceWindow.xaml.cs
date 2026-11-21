@@ -20,7 +20,9 @@ public partial class InvoiceWindow : Window
 
     private void AddAnimalRow()
     {
-        _animals.Add(new AnimalLine { RowNumber = _animals.Count + 1 });
+        var row = new AnimalLine { RowNumber = _animals.Count + 1 };
+        row.PropertyChanged += (_, _) => UpdateGrandTotal();
+        _animals.Add(row);
         UpdateGrandTotal();
     }
 
