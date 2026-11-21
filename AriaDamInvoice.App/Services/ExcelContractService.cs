@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using ClosedXML.Excel;
@@ -44,14 +45,9 @@ public sealed class ExcelContractService
         var excelPath = GetUniquePath(outputDirectory, baseName, ".xlsx");
         var pdfPath = Path.ChangeExtension(excelPath, ".pdf");
 
-        using (var templateStream = new FileStream(
-                   _templatePath, FileMode.Open, FileAccess.Read,
-                   FileShare.ReadWrite | FileShare.Delete))
-        using (var templateMemory = new MemoryStream())
+        using (var templateMemory = CreateTemplateSnapshot())
         {
-            templateStream.CopyTo(templateMemory);
             templateMemory.Position = 0;
-
             using var workbook = new XLWorkbook(templateMemory);
             var sheet = workbook.Worksheet("قرارداد فروش دام");
 
@@ -100,12 +96,61 @@ public sealed class ExcelContractService
         return (excelPath, pdfPath);
     }
 
+    private MemoryStream CreateTemplateSnapshot()
+    {
+        try
+        {
+            var memory = new MemoryStream();
+            using var stream = new FileStream(
+                _templatePath, FileMode.Open, FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
+            stream.CopyTo(memory);
+            memory.Position = 0;
+            return memory;
+        }
+        catch (IOException ex)
+        {
+            throw new IOException(
+                "فایل اکسل مرجع در حال حاضر توسط برنامه دیگری قفل شده است. لطفاً فایل مرجع را در Excel ببندید و دوباره صدور قرارداد را انجام دهید.", ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new UnauthorizedAccessException(
+                "دسترسی خواندن فایل اکسل مرجع ممکن نیست. سطح دسترسی فایل را بررسی کنید.", ex);
+        }
+    }
+
     private static void FillBuyerDetails(IXLWorksheet sheet, InvoiceData data)
     {
         sheet.Cell("C3").Value = data.ContractDate;
         sheet.Cell("G3").Value = data.BuyerName;
         sheet.Cell("C4").Value = data.Phone;
         sheet.Cell("G4").Value = data.Address;
+
+        foreach (var address in new[] { "C3", "G3", "C4", "G4" })
+            sheet.Cell(address).Style.Font.FontColor = XLColor.Black;
+
+        var documentLabel = sheet.Range("A1:H5").Cells()
+            .FirstOrDefault(cell => cell.GetString().Contains("شماره سند", StringComparison.Ordinal));
+        if (documentLabel is null)
+            throw new InvalidDataException(
+                "عنوان «شماره سند» در فایل اکسل مرجع پیدا نشد. لطفاً فایل مرجع را بررسی کنید.");
+
+        var labelMerge = sheet.MergedRanges.FirstOrDefault(range =>
+            range.RangeAddress.FirstAddress.RowNumber == documentLabel.Address.RowNumber &&
+            range.RangeAddress.FirstAddress.ColumnNumber == documentLabel.Address.ColumnNumber);
+        var targetColumn = (labelMerge?.RangeAddress.LastAddress.ColumnNumber
+                            ?? documentLabel.Address.ColumnNumber) + 1;
+        if (targetColumn > 8)
+            targetColumn = documentLabel.Address.ColumnNumber - 1;
+        if (targetColumn < 1)
+            throw new InvalidDataException("برای درج شماره سند در فایل مرجع، سلول مناسبی در کنار عنوان آن وجود ندارد.");
+
+        var numberCell = sheet.Cell(documentLabel.Address.RowNumber, targetColumn);
+        numberCell.Value = data.DocumentNumber.ToString(CultureInfo.InvariantCulture);
+        numberCell.Style.Font.FontColor = XLColor.Black;
+        numberCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        numberCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
     }
 
     private static int ResizeAnimalRows(IXLWorksheet sheet, int requestedCount)
@@ -165,6 +210,7 @@ public sealed class ExcelContractService
             }
 
             var animal = animals[index];
+            sheet.Range(row, 1, row, 7).Style.Font.FontColor = XLColor.Black;
             sheet.Cell(row, 2).Value = animal.Count;
             sheet.Cell(row, 3).Value = animal.Weight;
             sheet.Cell(row, 4).Value = animal.AnimalType;
@@ -225,6 +271,7 @@ public sealed class ExcelContractService
             var row = firstRow + index / 8;
             var column = 1 + index % 8;
             sheet.Cell(row, column).Value = tags[index];
+            sheet.Cell(row, column).Style.Font.FontColor = XLColor.Black;
         }
     }
 
@@ -328,7 +375,7 @@ public sealed class ExcelContractService
     {
         var candidate = Path.Combine(directory, baseName + extension);
         var index = 2;
-        while (File.Exists(candidate))
+        while (File.Exists(candidate) || File.Exists(Path.ChangeExtension(candidate, ".pdf")))
             candidate = Path.Combine(directory, $"{baseName}_{index++}{extension}");
         return candidate;
     }
