@@ -1,4 +1,4 @@
-namespace AriaDamInvoice.App.Models;
+namespace AriaDamInvoice.Models;
 
 public sealed class AppSettings
 {
