@@ -7,6 +7,32 @@
         FlowDirection="RightToLeft" Background="{StaticResource PageBrush}" TextElement.FontFamily="B Nazanin">
     <Window.Resources>
         <helpers:ThousandsSeparatorConverter x:Key="ThousandsSeparatorConverter"/>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="FontFamily" Value="B Nazanin"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="FontFamily" Value="B Nazanin"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="{x:Type DataGrid}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="RowHeight" Value="36"/>
+            <Setter Property="ColumnHeaderHeight" Value="40"/>
+            <Setter Property="BorderBrush" Value="#D8E1E8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="AlternatingRowBackground" Value="#F7FAFC"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+        </Style>
     </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -69,12 +95,29 @@
                 </Border>
                 <Border Background="White" CornerRadius="10" Padding="14" Margin="0,0,0,12">
                     <StackPanel>
-                        <TextBlock Text="پلاک گوش دام ارسالی" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
-                        <TextBlock Text="هر پلاک را در یک خط وارد کنید؛ تعداد پلاک‌ها مستقل از تعداد ردیف‌های دام است."
-                                   Foreground="{StaticResource MutedBrush}" Margin="0,5,0,8"/>
-                        <TextBox x:Name="EarTagsTextBox" FontFamily="B Yekan" MinHeight="90" AcceptsReturn="True" TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto" Padding="8" Foreground="Black"/>
-                        <TextBlock x:Name="EarTagCountText" Text="تعداد پلاک: ۰" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0"/>
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock Text="پلاک گوش دام ارسالی" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Button Content="حذف پلاک انتخاب‌شده" Click="RemoveEarTag_Click"
+                                        Background="#FEE2E2" Foreground="#991B1B"/>
+                                <Button Content="+ افزودن پلاک" Click="AddEarTag_Click"
+                                        Background="{StaticResource BrandBrush}" Foreground="White"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBlock Text="هر پلاک در یک ردیف جداگانه ثبت می‌شود. تعداد ردیف‌ها به‌صورت خودکار تنظیم می‌شود."
+                                   Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8"/>
+                        <DataGrid x:Name="EarTagsGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  SelectionMode="Single" MinHeight="110" MaxHeight="260"
+                                  AlternationCount="2" Foreground="Black">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ردیف" Binding="{Binding RowNumber}" IsReadOnly="True" Width="75"/>
+                                <DataGridTextColumn Header="شماره پلاک گوش" Binding="{Binding Tag, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="*" ElementStyle="{StaticResource NumberTextBlockStyle}"
+                                                    EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock x:Name="EarTagCountText" Text="تعداد پلاک: ۰" Foreground="{StaticResource MutedBrush}" Margin="4,8,0,0"/>
                     </StackPanel>
                 </Border>
 
