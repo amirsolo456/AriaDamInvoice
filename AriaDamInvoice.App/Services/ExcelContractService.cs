@@ -164,8 +164,6 @@ public sealed class ExcelContractService
                                ?? documentLabel.Address.ColumnNumber;
         var labelLastColumn = labelMerge?.RangeAddress.LastAddress.ColumnNumber
                               ?? documentLabel.Address.ColumnNumber;
-        var lastUsedColumn = usedRange.RangeAddress.LastAddress.ColumnNumber;
-
         // Prefer the cell immediately to the left of the label; if the label is
         // already at the left edge, use the first cell after its merged range.
         var targetColumn = labelFirstColumn > 1
@@ -178,7 +176,10 @@ public sealed class ExcelContractService
 
         var numberCell = sheet.Cell(documentLabel.Address.RowNumber, targetColumn);
         var numberMerge = sheet.MergedRanges.FirstOrDefault(range =>
-            range.Contains(numberCell));
+            numberCell.Address.RowNumber >= range.RangeAddress.FirstAddress.RowNumber &&
+            numberCell.Address.RowNumber <= range.RangeAddress.LastAddress.RowNumber &&
+            numberCell.Address.ColumnNumber >= range.RangeAddress.FirstAddress.ColumnNumber &&
+            numberCell.Address.ColumnNumber <= range.RangeAddress.LastAddress.ColumnNumber);
         if (numberMerge is not null)
             numberCell = sheet.Cell(
                 numberMerge.RangeAddress.FirstAddress.RowNumber,
