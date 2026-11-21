@@ -18,6 +18,9 @@ public sealed class ExcelContractService
     private const int SignatureRow = 30;
     private const int LastTemplateRow = 33;
     private const double A4HeightPoints = 841.89;
+    // The supplied reference workbook is configured for 64% print zoom.
+    // Keeping this fixed makes the flexible spacer predictable on every PC.
+    private const double PrintScale = 0.64d;
     private const double DefaultRowHeight = 15d;
 
     private readonly string _templatePath;
@@ -395,11 +398,12 @@ public sealed class ExcelContractService
     private static void ConfigurePrintLayout(IXLWorksheet sheet, int lastRow, int spacerRow)
     {
         const double marginInPoints = 18d; // 0.25 inch
-        const double safetySpace = 18d;
+        const double safetySpace = 12d;   // Keep a small printer/PDF safety margin.
         const double minimumSpacerHeight = 15d;
 
-        // Stretch the blank row immediately above the signature block. This anchors
-        // signatures and the address/footer at the bottom of A4 when content is short.
+        // Row heights are stored in points, while the supplied A4 template prints
+        // at 64% zoom. Convert the physical printable page height back to worksheet
+        // points before calculating the flexible row.
         double occupiedHeight = 0;
         for (var row = 1; row <= lastRow; row++)
         {
@@ -410,16 +414,30 @@ public sealed class ExcelContractService
             occupiedHeight += height > 0 ? height : DefaultRowHeight;
         }
 
-        var printableHeight = A4HeightPoints - (2 * marginInPoints) - safetySpace;
-        sheet.Row(spacerRow).Height =
-            Math.Max(minimumSpacerHeight, printableHeight - occupiedHeight);
+        var printableHeightAtWorksheetScale =
+            (A4HeightPoints - (2 * marginInPoints) - safetySpace) / PrintScale;
+        var availableSpacerHeight = printableHeightAtWorksheetScale - occupiedHeight;
+
+        if (availableSpacerHeight < minimumSpacerHeight)
+        {
+            throw new InvalidOperationException(
+                "تعداد ردیف‌های دام یا پلاک‌ها از ظرفیت یک صفحه A4 بیشتر است. " +
+                "برای حفظ اندازه خوانای نوشته‌ها، تعداد ردیف‌ها را کاهش دهید یا قرارداد را در چند بخش صادر کنید.");
+        }
+
+        // This is the flexible spacer directly above the signature block.
+        // Its height changes with the data; signatures and the footer stay anchored
+        // to the bottom of the same A4 page.
+        sheet.Row(spacerRow).Height = availableSpacerHeight;
 
         sheet.PageSetup.PrintAreas.Clear();
         sheet.PageSetup.PrintAreas.Add($"A1:H{lastRow}");
         sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
         sheet.PageSetup.PaperSize = XLPaperSize.A4Paper;
-        sheet.PageSetup.PagesWide = 1;
-        sheet.PageSetup.PagesTall = 1;
+        // Disable automatic vertical fit: it would shrink the flexible spacer
+        // along with the content and defeat the bottom anchoring.
+        sheet.PageSetup.PagesWide = 0;
+        sheet.PageSetup.PagesTall = 0;
         sheet.PageSetup.Margins.Top = 0.25;
         sheet.PageSetup.Margins.Bottom = 0.25;
         sheet.PageSetup.Margins.Left = 0.25;
@@ -473,9 +491,11 @@ internal static class ExcelPdfExporter
             pageSetup = contractSheet.PageSetup;
             pageSetup.PaperSize = 9; // xlPaperA4
             pageSetup.Orientation = 1; // xlPortrait
-            pageSetup.Zoom = false;
-            pageSetup.FitToPagesWide = 1;
-            pageSetup.FitToPagesTall = 1;
+            // Use the template's fixed 64% zoom. FitToPagesTall would
+            // rescale the spacer and move the signature block away from the bottom.
+            pageSetup.Zoom = 64;
+            pageSetup.FitToPagesWide = false;
+            pageSetup.FitToPagesTall = false;
             pageSetup.CenterHorizontally = true;
             pageSetup.CenterVertically = false;
             contractSheet.ExportAsFixedFormat(0, pdfPath);
