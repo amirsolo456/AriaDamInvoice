@@ -27,6 +27,7 @@
                             <TextBlock Text="مشخصات دام" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                                 <Button Content="حذف ردیف انتخاب‌شده" Click="RemoveAnimal_Click" Margin="4,0" Background="#FEE2E2" Foreground="#991B1B"/>
+                                <Button Content="افزودن نژاد جدید" Click="AddBreed_Click" Margin="4,0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}"/>
                                 <Button Content="+ افزودن ردیف دام" Click="AddAnimal_Click" Margin="4,0" Background="{StaticResource BrandBrush}" Foreground="White"/>
                             </StackPanel>
                         </DockPanel>
@@ -38,7 +39,20 @@
                                 <DataGridTextColumn Header="تعداد" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" Width="75" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="وزن" Binding="{Binding Weight, UpdateSourceTrigger=PropertyChanged}" Width="85" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="نوع دام" Binding="{Binding AnimalType, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                <DataGridTextColumn Header="نژاد" Binding="{Binding Breed, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTemplateColumn Header="نژاد" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Breed}" VerticalAlignment="Center" Margin="5,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.BreedOptions, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                      SelectedItem="{Binding Breed, UpdateSourceTrigger=PropertyChanged}"
+                                                      FontFamily="B Nazanin" IsEditable="False"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="قیمت واحد" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="جمع کل" Binding="{Binding LineTotal}" IsReadOnly="True" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="توضیح" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
