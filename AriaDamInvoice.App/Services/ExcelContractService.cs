@@ -215,7 +215,7 @@ public sealed class ExcelContractService
 
         numberCell.Value = data.DocumentNumber.ToString(CultureInfo.InvariantCulture);
         numberCell.Style.Font.FontColor = XLColor.Black;
-        numberCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        numberCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
         numberCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
     }
 
@@ -425,20 +425,22 @@ public sealed class ExcelContractService
                 "برای حفظ اندازه خوانای نوشته‌ها، تعداد ردیف‌ها را کاهش دهید یا قرارداد را در چند بخش صادر کنید.");
         }
 
-        // This is the flexible spacer directly above the signature block.
-        // Its height changes with the data; signatures and the footer stay anchored
-        // to the bottom of the same A4 page.
-        sheet.Row(spacerRow).Height = availableSpacerHeight;
+        // Split the available flexible space into two equal parts:
+        // the increased top margin moves the contract content toward the
+        // vertical center, while the remaining spacer keeps signatures/footer
+        // anchored at the bottom of the same A4 page.
+        var halfSpacerHeight = availableSpacerHeight / 2d;
+        sheet.Row(spacerRow).Height = halfSpacerHeight;
+        var topMarginInches = 0.25d + ((halfSpacerHeight * PrintScale) / 72d);
 
         sheet.PageSetup.PrintAreas.Clear();
         sheet.PageSetup.PrintAreas.Add($"A1:H{lastRow}");
         sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
         sheet.PageSetup.PaperSize = XLPaperSize.A4Paper;
-        // Disable automatic vertical fit: it would shrink the flexible spacer
-        // along with the content and defeat the bottom anchoring.
+        // Disable automatic vertical fit: it would rescale the flexible spaces.
         sheet.PageSetup.PagesWide = 0;
         sheet.PageSetup.PagesTall = 0;
-        sheet.PageSetup.Margins.Top = 0.25;
+        sheet.PageSetup.Margins.Top = topMarginInches;
         sheet.PageSetup.Margins.Bottom = 0.25;
         sheet.PageSetup.Margins.Left = 0.25;
         sheet.PageSetup.Margins.Right = 0.25;
