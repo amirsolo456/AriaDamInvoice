@@ -101,13 +101,13 @@
                                              FlowDirection="LeftToRight" TextAlignment="Center"
                                              VerticalContentAlignment="Center"/>
                                     <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <Button Content="+" Click="IncreaseDocumentNumber_Click" Height="24"
-                                                MinHeight="24" Padding="0" Margin="0,0,0,2"
-                                                FontFamily="B Yekan" FontSize="13"
+                                        <Button Click="IncreaseDocumentNumber_Click" Height="24" MinHeight="24" Padding="0"
+                                                Margin="0,0,0,2" FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11" Content="&#xE710;"
                                                 ToolTip="افزایش شماره سند"/>
-                                        <Button Content="−" Click="DecreaseDocumentNumber_Click" Height="24"
-                                                MinHeight="24" Padding="0" Margin="0,2,0,0"
-                                                FontFamily="B Yekan" FontSize="13"
+                                        <Button Click="DecreaseDocumentNumber_Click" Height="24" MinHeight="24" Padding="0"
+                                                Margin="0,2,0,0" FontFamily="Segoe MDL2 Assets"
+                                                FontSize="11" Content="&#xE738;"
                                                 ToolTip="کاهش شماره سند"/>
                                     </StackPanel>
                                 </Grid>
@@ -125,9 +125,9 @@
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock Text="مشخصات دام" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <Button Click="RemoveAnimal_Click" Margin="4,0" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف ردیف انتخاب‌شده" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="حذف"/></StackPanel></Button>
-                                <Button Click="AddBreed_Click" Margin="4,0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="افزودن گزینه نژاد" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="نژاد"/></StackPanel></Button>
-                                <Button Click="AddAnimal_Click" Margin="4,0" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن ردیف دام" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="افزودن دام"/></StackPanel></Button>
+                                <Button Click="RemoveAnimal_Click" Margin="4,0" Width="42" Height="40" Padding="0" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف ردیف انتخاب‌شده"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/></Button>
+                                <Button Click="AddBreed_Click" Margin="4,0" Width="42" Height="40" Padding="0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="افزودن گزینه نژاد"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/></Button>
+                                <Button Click="AddAnimal_Click" Margin="4,0" Width="42" Height="40" Padding="0" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن ردیف دام"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/></Button>
                             </StackPanel>
                         </DockPanel>
                         <Border BorderBrush="#DCE6E2" BorderThickness="1" CornerRadius="9" Padding="1" Background="White" ClipToBounds="True">
@@ -169,8 +169,8 @@
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock Text="پلاک گوش دام ارسالی" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <Button Click="RemoveEarTag_Click" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف پلاک انتخاب‌شده" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="حذف"/></StackPanel></Button>
-                                <Button Click="AddEarTag_Click" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن پلاک گوش" Padding="10,7"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/><TextBlock Text="افزودن پلاک"/></StackPanel></Button>
+                                <Button Click="RemoveEarTag_Click" Width="42" Height="40" Padding="0" Background="#FEE2E2" Foreground="#991B1B" ToolTip="حذف پلاک انتخاب‌شده"><TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/></Button>
+                                <Button Click="AddEarTag_Click" Width="42" Height="40" Padding="0" Background="{StaticResource BrandBrush}" Foreground="White" ToolTip="افزودن پلاک گوش"><TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/></Button>
                             </StackPanel>
                         </DockPanel>
                         <TextBlock Text="هر پلاک در یک ردیف" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8"/>
@@ -194,8 +194,8 @@
             </StackPanel>
         </ScrollViewer>
         <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <Button DockPanel.Dock="Left" Click="Cancel_Click" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="بستن بدون ذخیره"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0"/><TextBlock Text="بستن"/></StackPanel></Button>
-            <Button DockPanel.Dock="Right" Background="{StaticResource BrandBrush}" Foreground="White" Click="Save_Click" ToolTip="ذخیره اکسل و تولید PDF"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0"/><TextBlock Text="تولید قرارداد"/></StackPanel></Button>
+            <Button DockPanel.Dock="Left" Click="Cancel_Click" Width="46" Height="42" Padding="0" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}" ToolTip="بستن بدون ذخیره"><TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="17"/></Button>
+            <Button DockPanel.Dock="Right" Background="{StaticResource BrandBrush}" Foreground="White" Click="Save_Click" Width="46" Height="42" Padding="0" ToolTip="ذخیره اکسل و تولید PDF"><TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="17"/></Button>
             <TextBlock Text="Excel + PDF" FontFamily="B Yekan" VerticalAlignment="Center" Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0"/>
         </DockPanel>
     </Grid>
