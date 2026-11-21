@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Runtime.InteropServices;
 using ClosedXML.Excel;
 using AriaDamInvoice.Models;
@@ -47,7 +46,6 @@ public sealed class ExcelContractService
             sheet.PageSetup.PaperSize = XLPaperSize.A4;
             sheet.PageSetup.PagesWide = 1;
             sheet.PageSetup.PagesTall = 0;
-            sheet.PageSetup.Scale = 0;
             sheet.PageSetup.Margins.Top = 0.35;
             sheet.PageSetup.Margins.Bottom = 0.35;
             sheet.PageSetup.Margins.Left = 0.35;
@@ -178,6 +176,11 @@ public sealed class ExcelContractService
         sheet.Cell(titleRow, 1).Style.Font.FontName = "B Nazanin";
         sheet.Cell(titleRow, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
 
+        foreach (var merged in sheet.MergedRanges
+                     .Where(r => r.RangeAddress.FirstAddress.RowNumber >= bodyStart &&
+                                 r.RangeAddress.LastAddress.RowNumber <= bodyEnd)
+                     .ToList())
+            merged.Unmerge();
         sheet.Range(bodyStart, 1, bodyEnd, 8).Merge();
         var body = sheet.Cell(bodyStart, 1);
         body.Value = ContractText.ObligationsBody;
