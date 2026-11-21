@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 using AriaDamInvoice.Models;
 
 namespace AriaDamInvoice.Views;
@@ -93,7 +93,12 @@ public partial class InvoiceWindow : Window
 
     private void UpdateGrandTotal()
     {
-        GrandTotalText.Text = "جمع کل: " + _animals.Sum(x => x.LineTotal).ToString("N0");
+        GrandTotalText.Inlines.Clear();
+        GrandTotalText.Inlines.Add(new Run("جمع کل: ") { FontFamily = new System.Windows.Media.FontFamily("B Nazanin") });
+        GrandTotalText.Inlines.Add(new Run(_animals.Sum(x => x.LineTotal).ToString("N0"))
+        {
+            FontFamily = new System.Windows.Media.FontFamily("B Yekan")
+        });
     }
 
     private void UpdateEarTagCount()
@@ -103,7 +108,12 @@ public partial class InvoiceWindow : Window
             .Select(x => x.Trim())
             .Count(x => x.Length > 0);
 
-        EarTagCountText.Text = "تعداد پلاک: " + count.ToString("N0");
+        EarTagCountText.Inlines.Clear();
+        EarTagCountText.Inlines.Add(new Run("تعداد پلاک: ") { FontFamily = new System.Windows.Media.FontFamily("B Nazanin") });
+        EarTagCountText.Inlines.Add(new Run(count.ToString("N0"))
+        {
+            FontFamily = new System.Windows.Media.FontFamily("B Yekan")
+        });
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
