@@ -23,7 +23,7 @@ public sealed class ExcelContractService
         ArgumentNullException.ThrowIfNull(data);
         if (!File.Exists(_templatePath))
             throw new FileNotFoundException(
-                "قالب اکسل همراه برنامه پیدا نشد. برنامه را دوباره از مخزن دریافت و Build کنید.",
+                "فایل اکسل مرجع در مسیر ذخیره‌شده پیدا نشد. از داشبورد مسیر فایل مرجع را دوباره انتخاب کنید.",
                 _templatePath);
         if (!Directory.Exists(outputDirectory))
             throw new DirectoryNotFoundException("پوشه خروجی در دسترس نیست.");
