@@ -163,7 +163,6 @@
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="قیمت واحد" Binding="{Binding UnitPrice, UpdateSourceTrigger=LostFocus, Converter={StaticResource ThousandsSeparatorConverter}}" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
                                 <DataGridTextColumn Header="جمع کل" Binding="{Binding LineTotal, Converter={StaticResource ThousandsSeparatorConverter}}" IsReadOnly="True" Width="110" ElementStyle="{StaticResource NumberTextBlockStyle}" EditingElementStyle="{StaticResource NumberTextBoxStyle}"/>
-                                <DataGridTextColumn Header="توضیح" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                         </Border>
