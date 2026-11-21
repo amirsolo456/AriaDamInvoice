@@ -72,7 +72,7 @@ public partial class InvoiceWindow : Window
     {
         var normalized = NormalizeDigits(DocumentNumberTextBox.Text);
         return int.TryParse(normalized, NumberStyles.None, CultureInfo.InvariantCulture, out documentNumber)
-               && documentNumber >= 1;
+               && documentNumber >= 1 && documentNumber < int.MaxValue;
     }
 
     private bool TryGetContractDate(out DateTime gregorianDate)
