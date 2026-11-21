@@ -1,12 +1,50 @@
-﻿<Window x:Class="AriaDamInvoice.App.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<Window x:Class="AriaDamInvoice.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xresentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AriaDamInvoice.App"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+        Title="آریا دام خاتون | مدیریت فاکتور"
+        Height="560" Width="900" MinHeight="480" MinWidth="720"
+        WindowStartupLocation="CenterScreen" FlowDirection="RightToLeft"
+        Background="#F4F6F8">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="آریا دام خاتون" FontSize="27" FontWeight="Bold" Foreground="#173B35"/>
+            <TextBlock Text="سامانه صدور و مدیریت قرارداد فروش دام" FontSize="14" Foreground="#64748B" Margin="0,7,0,0"/>
+        </StackPanel>
+        <Border Grid.Row="1" Background="White" CornerRadius="14" Padding="30" BorderBrush="#E2E8F0" BorderThickness="1">
+            <Grid>
+                <Grid x:Name="SetupPanel" Visibility="Collapsed" VerticalAlignment="Center" MaxWidth="600" HorizontalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="انتخاب محل ذخیره‌سازی" FontSize="22" FontWeight="SemiBold" Foreground="#1E293B" HorizontalAlignment="Center"/>
+                        <TextBlock Text="برای شروع، پوشه‌ای را انتخاب کنید تا فایل‌های اکسل و PDF قراردادها در آن ذخیره شوند." TextWrapping="Wrap" TextAlignment="Center" Foreground="#64748B" Margin="0,14,0,24"/>
+                        <Button Content="انتخاب پوشه" Height="44" Padding="22,0" HorizontalAlignment="Center" Background="#176B57" Foreground="White" BorderThickness="0" Cursor="Hand" Click="ChooseFolder_Click"/>
+                        <TextBlock x:Name="SelectedFolderText" Margin="0,18,0,0" TextWrapping="Wrap" Foreground="#475569" TextAlignment="Center"/>
+                        <Button x:Name="SaveFolderButton" Content="ذخیره و ادامه" Height="44" Margin="0,22,0,0" Background="#173B35" Foreground="White" BorderThickness="0" Cursor="Hand" IsEnabled="False" Click="SaveFolder_Click"/>
+                    </StackPanel>
+                </Grid>
+                <Grid x:Name="DashboardPanel" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="داشبورد" FontSize="23" FontWeight="SemiBold" Foreground="#1E293B"/>
+                        <TextBlock Text="محل ذخیره‌سازی فایل‌ها:" Margin="0,16,0,5" Foreground="#64748B"/>
+                        <TextBlock x:Name="OutputFolderText" TextWrapping="Wrap" Foreground="#176B57" FontWeight="SemiBold"/>
+                    </StackPanel>
+                    <UniformGrid Grid.Row="1" Columns="2" Margin="0,30,0,0">
+                        <Button Content="صدور قرارداد جدید" Height="76" Margin="0,0,8,0" FontSize="16" FontWeight="SemiBold" Background="#176B57" Foreground="White" BorderThickness="0" Cursor="Hand" Click="NewInvoice_Click"/>
+                        <Button Content="قراردادهای قبلی" Height="76" Margin="8,0,0,0" FontSize="16" FontWeight="SemiBold" Background="#E8EEF0" Foreground="#173B35" BorderThickness="0" Cursor="Hand" Click="PreviousInvoices_Click"/>
+                    </UniformGrid>
+                    <StackPanel Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Left">
+                        <Button Content="تغییر محل ذخیره‌سازی" Padding="18,9" Background="Transparent" Foreground="#475569" BorderBrush="#CBD5E1" Cursor="Hand" Click="ChangeFolder_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
