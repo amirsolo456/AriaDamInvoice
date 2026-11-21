@@ -13,16 +13,19 @@ Windows desktop application for creating and managing livestock sale contracts f
 - No user-specific Windows paths are stored in source code.
 - User settings are stored under the current Windows user's `%AppData%\AriaDamInvoice\settings.json`.
 - The output folder is selected by the user. If the saved folder is unavailable on another computer, the application asks the user to select a valid folder again.
-- The WPF window is resizable and its content can scroll on smaller displays.
+- The WPF windows are resizable and their content can scroll on smaller displays.
 
-## Current foundation
-- Persian WPF application shell
-- First-run output-folder selection
-- Persistent output-folder setting
-- Dashboard entry points for new and previous contracts (workflow placeholders)
+## Current implementation
+- Persian WPF dashboard and persistent output-folder selection.
+- Contract entry window with buyer, phone, address, and contract date.
+- Add/remove livestock rows independently, with automatic row numbering and line/overall totals.
+- Enter ear tags one per line; the ear-tag count is independent of livestock rows.
+- Contract notes field.
+
+The current Save button is still a placeholder: Excel template population, persistence of the contract, and PDF export are not connected yet.
 
 ## Build and run
-Requires a Windows machine with the .NET 10 SDK and Windows Desktop targeting support.
+Requires Windows with the .NET 10 SDK and Windows Desktop targeting support.
 
 ```powershell
 dotnet restore
@@ -30,9 +33,8 @@ dotnet build
 dotnet run --project AriaDamInvoice.App
 ```
 
-## Planned implementation
-1. Add the approved Excel contract template.
-2. Create contract data models and input screens.
-3. Generate variable-length animal and ear-tag tables.
-4. Save editable Excel contracts and export matching PDFs.
-5. Browse, reopen, and edit existing contracts.
+## Next steps
+1. Connect the approved Excel template and map its cells.
+2. Save a contract as an editable Excel file.
+3. Export a matching PDF with variable-length tables and page layout.
+4. Browse, reopen, and edit previous contracts.
