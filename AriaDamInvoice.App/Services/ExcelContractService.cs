@@ -44,7 +44,7 @@ public sealed class ExcelContractService
             sheet.PageSetup.PrintAreas.Clear();
             sheet.PageSetup.PrintAreas.Add($"A1:H{lastRow}");
             sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
-            sheet.PageSetup.PaperSize = XLPaperSize.A4;
+            sheet.PageSetup.PaperSize = XLPaperSize.A4Paper;
             sheet.PageSetup.PagesWide = 1;
             sheet.PageSetup.PagesTall = 0;
             sheet.PageSetup.Margins.Top = 0.35;
@@ -56,7 +56,7 @@ public sealed class ExcelContractService
             back.PageSetup.PrintAreas.Clear();
             back.PageSetup.PrintAreas.Add("A1:H19");
             back.PageSetup.PageOrientation = XLPageOrientation.Portrait;
-            back.PageSetup.PaperSize = XLPaperSize.A4;
+            back.PageSetup.PaperSize = XLPaperSize.A4Paper;
             back.PageSetup.PagesWide = 1;
             back.PageSetup.PagesTall = 1;
 
