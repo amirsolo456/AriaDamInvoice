@@ -158,61 +158,9 @@ public sealed class ExcelContractService
         foreach (var address in new[] { "C4", "G4", "C5", "G5" })
             sheet.Cell(address).Style.Font.FontColor = XLColor.Black;
 
-        // Search the complete used range rather than assuming the label is inside A1:H5.
-        // This also supports templates whose header columns or merged cells were rearranged.
-        var usedRange = sheet.RangeUsed()
-            ?? throw new InvalidDataException("فایل اکسل مرجع خالی است یا محدوده استفاده‌شده ندارد.");
-
-        static string NormalizeLabel(string value)
-        {
-            return value
-                .Replace("ي", "ی")
-                .Replace("ك", "ک")
-                .Replace("\u200c", "")
-                .Replace(" ", "")
-                .Replace(":", "")
-                .Replace("：", "")
-                .Trim();
-        }
-
-        var documentLabel = usedRange.Cells()
-            .FirstOrDefault(cell =>
-                NormalizeLabel(cell.GetString()).Contains("شمارهسند", StringComparison.Ordinal));
-
-        if (documentLabel is null)
-            throw new InvalidDataException(
-                "عنوان «شماره سند» در هیچ‌یک از سلول‌های فایل اکسل مرجع پیدا نشد. " +
-                "عبارت «شماره سند» را داخل یک سلول واقعی اکسل (نه Text Box) قرار دهید و فایل را ذخیره کنید.");
-
-        var labelMerge = sheet.MergedRanges.FirstOrDefault(range =>
-            range.RangeAddress.FirstAddress.RowNumber == documentLabel.Address.RowNumber &&
-            range.RangeAddress.FirstAddress.ColumnNumber == documentLabel.Address.ColumnNumber);
-
-        var labelFirstColumn = labelMerge?.RangeAddress.FirstAddress.ColumnNumber
-                               ?? documentLabel.Address.ColumnNumber;
-        var labelLastColumn = labelMerge?.RangeAddress.LastAddress.ColumnNumber
-                              ?? documentLabel.Address.ColumnNumber;
-        // Prefer the cell immediately to the left of the label; if the label is
-        // already at the left edge, use the first cell after its merged range.
-        var targetColumn = labelFirstColumn > 1
-            ? labelFirstColumn - 1
-            : labelLastColumn + 1;
-
-        if (targetColumn > 16_384)
-            throw new InvalidDataException(
-                "در کنار عنوان شماره سند فضای کافی برای درج شماره وجود ندارد. فایل مرجع را اصلاح کنید.");
-
-        var numberCell = sheet.Cell(documentLabel.Address.RowNumber, targetColumn);
-        var numberMerge = sheet.MergedRanges.FirstOrDefault(range =>
-            numberCell.Address.RowNumber >= range.RangeAddress.FirstAddress.RowNumber &&
-            numberCell.Address.RowNumber <= range.RangeAddress.LastAddress.RowNumber &&
-            numberCell.Address.ColumnNumber >= range.RangeAddress.FirstAddress.ColumnNumber &&
-            numberCell.Address.ColumnNumber <= range.RangeAddress.LastAddress.ColumnNumber);
-        if (numberMerge is not null)
-            numberCell = sheet.Cell(
-                numberMerge.RangeAddress.FirstAddress.RowNumber,
-                numberMerge.RangeAddress.FirstAddress.ColumnNumber);
-
+        // The approved reference workbook places the document-number label in G1.
+        // H1 is the fixed value cell; keep this mapping explicit.
+        var numberCell = sheet.Cell("H1");
         numberCell.Value = data.DocumentNumber.ToString(CultureInfo.InvariantCulture);
         numberCell.Style.Font.FontColor = XLColor.Black;
         numberCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
@@ -397,55 +345,22 @@ public sealed class ExcelContractService
 
     private static void ConfigurePrintLayout(IXLWorksheet sheet, int lastRow, int spacerRow)
     {
-        const double marginInPoints = 18d; // 0.25 inch
-        const double safetySpace = 12d;   // Keep a small printer/PDF safety margin.
-        const double minimumSpacerHeight = 15d;
-
-        // Row heights are stored in points, while the supplied A4 template prints
-        // at 64% zoom. Convert the physical printable page height back to worksheet
-        // points before calculating the flexible row.
-        double occupiedHeight = 0;
-        for (var row = 1; row <= lastRow; row++)
-        {
-            if (row == spacerRow)
-                continue;
-
-            var height = sheet.Row(row).Height;
-            occupiedHeight += height > 0 ? height : DefaultRowHeight;
-        }
-
-        var printableHeightAtWorksheetScale =
-            (A4HeightPoints - (2 * marginInPoints) - safetySpace) / PrintScale;
-        var availableSpacerHeight = printableHeightAtWorksheetScale - occupiedHeight;
-
-        if (availableSpacerHeight < minimumSpacerHeight)
-        {
-            throw new InvalidOperationException(
-                "تعداد ردیف‌های دام یا پلاک‌ها از ظرفیت یک صفحه A4 بیشتر است. " +
-                "برای حفظ اندازه خوانای نوشته‌ها، تعداد ردیف‌ها را کاهش دهید یا قرارداد را در چند بخش صادر کنید.");
-        }
-
-        // Split the available flexible space into two equal parts:
-        // the increased top margin moves the contract content toward the
-        // vertical center, while the remaining spacer keeps signatures/footer
-        // anchored at the bottom of the same A4 page.
-        var halfSpacerHeight = availableSpacerHeight / 2d;
-        sheet.Row(spacerRow).Height = halfSpacerHeight;
-        var topMarginInches = 0.25d + ((halfSpacerHeight * PrintScale) / 72d);
+        // Keep the flexible spacer at its normal minimum height. Excel's one-page
+        // scaling expands short contracts and scales down longer ones proportionally.
+        sheet.Row(spacerRow).Height = DefaultRowHeight;
 
         sheet.PageSetup.PrintAreas.Clear();
         sheet.PageSetup.PrintAreas.Add($"A1:H{lastRow}");
         sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
         sheet.PageSetup.PaperSize = XLPaperSize.A4Paper;
-        // Disable automatic vertical fit: it would rescale the flexible spaces.
-        sheet.PageSetup.PagesWide = 0;
-        sheet.PageSetup.PagesTall = 0;
-        sheet.PageSetup.Margins.Top = topMarginInches;
+        sheet.PageSetup.PagesWide = 1;
+        sheet.PageSetup.PagesTall = 1;
+        sheet.PageSetup.Margins.Top = 0.25;
         sheet.PageSetup.Margins.Bottom = 0.25;
         sheet.PageSetup.Margins.Left = 0.25;
         sheet.PageSetup.Margins.Right = 0.25;
         sheet.PageSetup.CenterHorizontally = true;
-        sheet.PageSetup.CenterVertically = false;
+        sheet.PageSetup.CenterVertically = true;
     }
 
     private static string MakeSafeFileName(string value)
@@ -493,13 +408,13 @@ internal static class ExcelPdfExporter
             pageSetup = contractSheet.PageSetup;
             pageSetup.PaperSize = 9; // xlPaperA4
             pageSetup.Orientation = 1; // xlPortrait
-            // Use the template's fixed 64% zoom. FitToPagesTall would
-            // rescale the spacer and move the signature block away from the bottom.
-            pageSetup.Zoom = 64;
-            pageSetup.FitToPagesWide = false;
-            pageSetup.FitToPagesTall = false;
+            // Fit the complete print area to exactly one A4 page.
+            // Excel scales short contracts up and longer contracts down.
+            pageSetup.Zoom = false;
+            pageSetup.FitToPagesWide = 1;
+            pageSetup.FitToPagesTall = 1;
             pageSetup.CenterHorizontally = true;
-            pageSetup.CenterVertically = false;
+            pageSetup.CenterVertically = true;
             contractSheet.ExportAsFixedFormat(0, pdfPath);
 
             workbook.Close(false);
