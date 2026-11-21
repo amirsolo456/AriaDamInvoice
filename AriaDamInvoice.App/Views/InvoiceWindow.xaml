@@ -104,13 +104,13 @@
                                     </Grid.ColumnDefinitions>
                                     <Button Grid.Column="0" Click="IncreaseDocumentNumber_Click"
                                             Width="26" Height="30" MinHeight="30" Padding="0"
-                                            Margin="0,0,2,0" FontFamily="Segoe MDL2 Assets"
-                                            FontSize="11" Content="&#xE710;"
+                                            Margin="0,0,2,0" FontFamily="Segoe UI" FontSize="18"
+                                            FontWeight="Bold" Foreground="#176B57" Content="+"
                                             ToolTip="افزایش شماره سند"/>
                                     <Button Grid.Column="1" Click="DecreaseDocumentNumber_Click"
                                             Width="26" Height="30" MinHeight="30" Padding="0"
-                                            Margin="0,0,2,0" FontFamily="Segoe MDL2 Assets"
-                                            FontSize="11" Content="&#xE738;"
+                                            Margin="0,0,2,0" FontFamily="Segoe UI" FontSize="18"
+                                            FontWeight="Bold" Foreground="#176B57" Content="−"
                                             ToolTip="کاهش شماره سند"/>
                                     <TextBox Grid.Column="2" x:Name="DocumentNumberTextBox"
                                              BorderThickness="0" Background="Transparent"
