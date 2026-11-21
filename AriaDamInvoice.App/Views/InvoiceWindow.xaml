@@ -83,7 +83,7 @@
             <Button Content="انصراف" DockPanel.Dock="Left" Click="Cancel_Click" Background="#E8EEF0" Foreground="{StaticResource BrandDarkBrush}"/>
             <Button Content="ذخیره و تولید قرارداد" DockPanel.Dock="Right" Background="{StaticResource BrandBrush}"
                     Foreground="White" Click="Save_Click"/>
-            <TextBlock Text="اتصال خروجی اکسل و PDF در مرحله بعد انجام می‌شود." VerticalAlignment="Center"
+            <TextBlock Text="فایل اکسل و PDF در پوشه انتخاب‌شده ذخیره می‌شوند." VerticalAlignment="Center"
                        Foreground="{StaticResource MutedBrush}" Margin="0,0,12,0"/>
         </DockPanel>
     </Grid>
