@@ -9,14 +9,14 @@ namespace AriaDamInvoice.Services;
 
 public sealed class ExcelContractService
 {
-    private const int FirstAnimalRow = 7;
+    private const int FirstAnimalRow = 8;
     private const int TemplateAnimalRows = 10;
-    private const int EarTagTitleRow = 19;
-    private const int FirstEarTagRow = 20;
+    private const int EarTagTitleRow = 20;
+    private const int FirstEarTagRow = 21;
     private const int TemplateEarTagRows = 5;
-    private const int ObligationsTitleRow = 26;
-    private const int SignatureRow = 29;
-    private const int LastTemplateRow = 32;
+    private const int ObligationsTitleRow = 27;
+    private const int SignatureRow = 30;
+    private const int LastTemplateRow = 33;
     private const double A4HeightPoints = 841.89;
     private const double DefaultRowHeight = 15d;
 
@@ -53,13 +53,13 @@ public sealed class ExcelContractService
 
             FillBuyerDetails(sheet, data);
 
-            // Animal table: rows 7-16, total row 17 in the original template.
+            // Reference workbook: header row 7, animal rows 8-17, total row 18.
             var animalDelta = ResizeAnimalRows(sheet, data.Animals.Count);
             var animalCount = Math.Max(1, data.Animals.Count);
             var totalRow = FirstAnimalRow + animalCount;
             FillAnimalRows(sheet, data.Animals, totalRow);
 
-            // The ear-tag block is independently sized. Eight tags fit per row.
+            // Reference workbook: title row 20, five tag rows (21-25). Eight tags fit per row.
             var earTagTitle = EarTagTitleRow + animalDelta;
             sheet.Cell(earTagTitle, 1).Value = "پلاک گوش دام ارسالی";
             var tagDelta = ResizeEarTagRows(sheet, data.EarTags.Count, animalDelta);
@@ -147,12 +147,12 @@ public sealed class ExcelContractService
 
     private static void FillBuyerDetails(IXLWorksheet sheet, InvoiceData data)
     {
-        sheet.Cell("C3").Value = data.ContractDate;
-        sheet.Cell("G3").Value = data.BuyerName;
-        sheet.Cell("C4").Value = data.Phone;
-        sheet.Cell("G4").Value = data.Address;
+        sheet.Cell("C4").Value = data.ContractDate;
+        sheet.Cell("G4").Value = data.BuyerName;
+        sheet.Cell("C5").Value = data.Phone;
+        sheet.Cell("G5").Value = data.Address;
 
-        foreach (var address in new[] { "C3", "G3", "C4", "G4" })
+        foreach (var address in new[] { "C4", "G4", "C5", "G5" })
             sheet.Cell(address).Style.Font.FontColor = XLColor.Black;
 
         // Search the complete used range rather than assuming the label is inside A1:H5.
@@ -280,8 +280,7 @@ public sealed class ExcelContractService
             sheet.Cell(row, 5).Value = animal.Breed;
             sheet.Cell(row, 6).Value = animal.UnitPrice;
             sheet.Cell(row, 7).FormulaA1 = $"=IF(OR(B{row}=\"\",F{row}=\"\"),\"\",B{row}*F{row})";
-            sheet.Cell(row, 8).Value = animal.Description;
-            sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
+                        sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
             sheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
         }
 
@@ -291,7 +290,7 @@ public sealed class ExcelContractService
         sheet.Cell(totalRow, 7).Style.NumberFormat.Format = "#,##0";
     }
 
-    // Ear-tag template rows 20-24 contain eight cells per row.
+    // Ear-tag template rows 21-25 contain eight cells per row.
     private static int ResizeEarTagRows(IXLWorksheet sheet, int tagCount, int animalDelta)
     {
         var neededRows = Math.Max(1, (int)Math.Ceiling(tagCount / 8d));
@@ -364,13 +363,13 @@ public sealed class ExcelContractService
         all.Style.Font.FontSize = 14;
 
         // Numeric content uses B Yekan and a readable size.
-        sheet.Range(7, 1, totalRow - 1, 1).Style.Font.FontName = "B Yekan";
+        sheet.Range(FirstAnimalRow, 1, totalRow - 1, 1).Style.Font.FontName = "B Yekan";
         sheet.Range(7, 1, totalRow - 1, 1).Style.Font.FontSize = 12;
-        sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontName = "B Yekan";
+        sheet.Range(FirstAnimalRow, 2, totalRow - 1, 3).Style.Font.FontName = "B Yekan";
         sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontSize = 12;
-        sheet.Range(7, 6, totalRow, 7).Style.Font.FontName = "B Yekan";
+        sheet.Range(FirstAnimalRow, 6, totalRow, 7).Style.Font.FontName = "B Yekan";
         sheet.Range(7, 6, totalRow, 7).Style.Font.FontSize = 12;
-        sheet.Cell("C3").Style.Font.FontName = "B Yekan";
+        sheet.Cell("C5").Style.Font.FontName = "B Yekan";
         sheet.Cell("C4").Style.Font.FontName = "B Yekan";
 
         if (tagRows > 0)
@@ -380,7 +379,7 @@ public sealed class ExcelContractService
             tags.Style.Font.FontSize = 12;
         }
 
-        sheet.Row(6).Style.Font.FontName = "B Nazanin";
+        sheet.Row(7).Style.Font.FontName = "B Nazanin";
         sheet.Row(6).Style.Font.FontSize = 14;
         sheet.Row(6).Style.Font.Bold = true;
         sheet.Row(tagTitleRow).Style.Font.FontName = "B Nazanin";
