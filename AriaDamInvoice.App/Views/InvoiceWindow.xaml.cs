@@ -288,7 +288,7 @@ public partial class InvoiceWindow : Window
                 EarTags = tags
             };
 
-            var service = new ExcelContractService();
+            var service = new ExcelContractService(_settings.TemplateFilePath);
             var result = service.Create(data, _settings.OutputDirectory);
 
             MessageBox.Show(
