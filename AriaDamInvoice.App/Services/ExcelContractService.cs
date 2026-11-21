@@ -253,8 +253,8 @@ public sealed class ExcelContractService
         all.Style.Font.FontSize = 14;
 
         // Numeric content uses B Yekan and a readable size.
-        sheet.Range(7, 1, totalRow, 1).Style.Font.FontName = "B Yekan";
-        sheet.Range(7, 1, totalRow, 1).Style.Font.FontSize = 12;
+        sheet.Range(7, 1, totalRow - 1, 1).Style.Font.FontName = "B Yekan";
+        sheet.Range(7, 1, totalRow - 1, 1).Style.Font.FontSize = 12;
         sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontName = "B Yekan";
         sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontSize = 12;
         sheet.Range(7, 6, totalRow, 7).Style.Font.FontName = "B Yekan";
@@ -368,7 +368,6 @@ internal static class ExcelPdfExporter
             pageSetup.FitToPagesTall = 1;
             pageSetup.CenterHorizontally = true;
             pageSetup.CenterVertically = false;
-            pageSetup.PrintArea = contractSheet.PageSetup.PrintArea;
             contractSheet.ExportAsFixedFormat(0, pdfPath);
 
             workbook.Close(false);
