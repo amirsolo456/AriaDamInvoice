@@ -97,21 +97,26 @@
                             <Border Height="44" Margin="0,6,0,0" Background="#FFFFFF" BorderBrush="#CBD5E1"
                                     BorderThickness="1" CornerRadius="8" Padding="4">
                                 <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBox x:Name="DocumentNumberTextBox" BorderThickness="0" Background="Transparent"
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Click="IncreaseDocumentNumber_Click"
+                                            Width="26" Height="30" MinHeight="30" Padding="0"
+                                            Margin="0,0,2,0" FontFamily="Segoe MDL2 Assets"
+                                            FontSize="11" Content="&#xE710;"
+                                            ToolTip="افزایش شماره سند"/>
+                                    <Button Grid.Column="1" Click="DecreaseDocumentNumber_Click"
+                                            Width="26" Height="30" MinHeight="30" Padding="0"
+                                            Margin="0,0,2,0" FontFamily="Segoe MDL2 Assets"
+                                            FontSize="11" Content="&#xE738;"
+                                            ToolTip="کاهش شماره سند"/>
+                                    <TextBox Grid.Column="2" x:Name="DocumentNumberTextBox"
+                                             BorderThickness="0" Background="Transparent"
                                              Padding="5,5" FontFamily="B Yekan" Foreground="Black"
                                              FlowDirection="LeftToRight" TextAlignment="Center"
                                              VerticalContentAlignment="Center"/>
-                                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <Button Click="IncreaseDocumentNumber_Click" Height="24" MinHeight="24" Padding="0"
-                                                Margin="0,0,0,2" FontFamily="Segoe MDL2 Assets"
-                                                FontSize="11" Content="&#xE710;"
-                                                ToolTip="افزایش شماره سند"/>
-                                        <Button Click="DecreaseDocumentNumber_Click" Height="24" MinHeight="24" Padding="0"
-                                                Margin="0,2,0,0" FontFamily="Segoe MDL2 Assets"
-                                                FontSize="11" Content="&#xE738;"
-                                                ToolTip="کاهش شماره سند"/>
-                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </StackPanel>
