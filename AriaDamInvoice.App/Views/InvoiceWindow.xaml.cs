@@ -1,19 +1,38 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using AriaDamInvoice.Models;
+using AriaDamInvoice.Services;
 
 namespace AriaDamInvoice.Views;
 
 public partial class InvoiceWindow : Window
 {
     private readonly ObservableCollection<AnimalLine> _animals = new();
+    private readonly ObservableCollection<string> _breedOptions = new();
     private readonly PersianCalendar _persianCalendar = new();
+    private readonly SettingsService _settingsService = new();
+    private readonly AppSettings _settings;
+
+    public ObservableCollection<string> BreedOptions => _breedOptions;
 
     public InvoiceWindow()
     {
         InitializeComponent();
+
+        _settings = _settingsService.Load();
+        if (_settings.BreedOptions is null || _settings.BreedOptions.Count == 0)
+            _settings.BreedOptions = new List<string> { "همو", "هترو", "افشاری" };
+
+        foreach (var breed in _settings.BreedOptions
+                     .Where(x => !string.IsNullOrWhiteSpace(x))
+                     .Distinct(StringComparer.CurrentCultureIgnoreCase))
+            _breedOptions.Add(breed);
+
+        DataContext = this;
         ContractDateTextBox.Text = FormatPersianDate(DateTime.Today);
         AnimalsGrid.ItemsSource = _animals;
         AddAnimalRow();
@@ -91,13 +110,109 @@ public partial class InvoiceWindow : Window
         UpdateGrandTotal();
     }
 
+    private void AddBreed_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Window
+        {
+            Title = "افزودن نژاد جدید",
+            Width = 360,
+            Height = 190,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            FlowDirection = FlowDirection.RightToLeft,
+            FontFamily = new FontFamily("B Nazanin"),
+            Background = Brushes.White
+        };
+
+        var panel = new StackPanel { Margin = new Thickness(18) };
+        panel.Children.Add(new TextBlock
+        {
+            Text = "نام گزینه جدید را وارد کنید:",
+            FontSize = 17,
+            Margin = new Thickness(0, 0, 0, 8)
+        });
+
+        var input = new TextBox
+        {
+            FontFamily = new FontFamily("B Nazanin"),
+            FontSize = 17,
+            Padding = new Thickness(7)
+        };
+        panel.Children.Add(input);
+
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 14, 0, 0)
+        };
+
+        var addButton = new Button
+        {
+            Content = "افزودن",
+            MinWidth = 90,
+            Margin = new Thickness(0, 0, 8, 0),
+            IsDefault = true,
+            Background = new SolidColorBrush(Color.FromRgb(23, 107, 87)),
+            Foreground = Brushes.White
+        };
+        var cancelButton = new Button
+        {
+            Content = "انصراف",
+            MinWidth = 90,
+            IsCancel = true
+        };
+
+        addButton.Click += (_, _) =>
+        {
+            var value = input.Text.Trim();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                MessageBox.Show(dialog, "نام گزینه را وارد کنید.", "افزودن نژاد",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_breedOptions.Any(x => string.Equals(x, value, StringComparison.CurrentCultureIgnoreCase)))
+            {
+                MessageBox.Show(dialog, "این گزینه قبلاً ثبت شده است.", "افزودن نژاد",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            _breedOptions.Add(value);
+            _settings.BreedOptions = _breedOptions.ToList();
+
+            try
+            {
+                _settingsService.Save(_settings);
+                dialog.DialogResult = true;
+                dialog.Close();
+            }
+            catch (Exception ex)
+            {
+                _breedOptions.Remove(value);
+                MessageBox.Show(dialog, $"ذخیره گزینه انجام نشد.\n{ex.Message}", "خطا",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        };
+
+        buttons.Children.Add(addButton);
+        buttons.Children.Add(cancelButton);
+        panel.Children.Add(buttons);
+        dialog.Content = panel;
+        dialog.Loaded += (_, _) => input.Focus();
+        dialog.ShowDialog();
+    }
+
     private void UpdateGrandTotal()
     {
         GrandTotalText.Inlines.Clear();
-        GrandTotalText.Inlines.Add(new Run("جمع کل: ") { FontFamily = new System.Windows.Media.FontFamily("B Nazanin") });
+        GrandTotalText.Inlines.Add(new Run("جمع کل: ") { FontFamily = new FontFamily("B Nazanin") });
         GrandTotalText.Inlines.Add(new Run(_animals.Sum(x => x.LineTotal).ToString("N0"))
         {
-            FontFamily = new System.Windows.Media.FontFamily("B Yekan")
+            FontFamily = new FontFamily("B Yekan")
         });
     }
 
@@ -109,10 +224,10 @@ public partial class InvoiceWindow : Window
             .Count(x => x.Length > 0);
 
         EarTagCountText.Inlines.Clear();
-        EarTagCountText.Inlines.Add(new Run("تعداد پلاک: ") { FontFamily = new System.Windows.Media.FontFamily("B Nazanin") });
+        EarTagCountText.Inlines.Add(new Run("تعداد پلاک: ") { FontFamily = new FontFamily("B Nazanin") });
         EarTagCountText.Inlines.Add(new Run(count.ToString("N0"))
         {
-            FontFamily = new System.Windows.Media.FontFamily("B Yekan")
+            FontFamily = new FontFamily("B Yekan")
         });
     }
 
