@@ -10,12 +10,14 @@ public sealed class ExcelContractService
 {
     private const int FirstAnimalRow = 7;
     private const int TemplateAnimalRows = 10;
-    private const int TemplateEarTagTitleRow = 19;
+    private const int EarTagTitleRow = 19;
     private const int FirstEarTagRow = 20;
     private const int TemplateEarTagRows = 5;
-    private const int TemplateObligationsTitleRow = 26;
-    private const int TemplateSignatureRow = 29;
-    private const int TemplateLastRow = 32;
+    private const int ObligationsTitleRow = 26;
+    private const int SignatureRow = 29;
+    private const int LastTemplateRow = 32;
+    private const double A4HeightPoints = 841.89;
+    private const double DefaultRowHeight = 15d;
 
     private readonly string _templatePath;
 
@@ -27,23 +29,23 @@ public sealed class ExcelContractService
     public (string ExcelPath, string PdfPath) Create(InvoiceData data, string outputDirectory)
     {
         ArgumentNullException.ThrowIfNull(data);
+
         if (!File.Exists(_templatePath))
             throw new FileNotFoundException(
                 "فایل اکسل مرجع در مسیر ذخیره‌شده پیدا نشد. از داشبورد مسیر فایل مرجع را دوباره انتخاب کنید.",
                 _templatePath);
+
         if (!Directory.Exists(outputDirectory))
             throw new DirectoryNotFoundException("پوشه خروجی در دسترس نیست.");
 
-        var safeBuyer = MakeSafeFileName(string.IsNullOrWhiteSpace(data.BuyerName)
+        var buyer = MakeSafeFileName(string.IsNullOrWhiteSpace(data.BuyerName)
             ? "بدون نام" : data.BuyerName);
-        var baseName = $"{data.ContractDate.Replace('/', '-')}_{safeBuyer}";
+        var baseName = $"{data.ContractDate.Replace('/', '-')}_{buyer}";
         var excelPath = GetUniquePath(outputDirectory, baseName, ".xlsx");
         var pdfPath = Path.ChangeExtension(excelPath, ".pdf");
 
         using (var templateStream = new FileStream(
-                   _templatePath,
-                   FileMode.Open,
-                   FileAccess.Read,
+                   _templatePath, FileMode.Open, FileAccess.Read,
                    FileShare.ReadWrite | FileShare.Delete))
         using (var templateMemory = new MemoryStream())
         {
@@ -55,26 +57,34 @@ public sealed class ExcelContractService
 
             FillBuyerDetails(sheet, data);
 
-            // Resize each variable section independently. Inserting/deleting rows at
-            // the section boundary moves every following template section together.
+            // Animal table: rows 7-16, total row 17 in the original template.
             var animalDelta = ResizeAnimalRows(sheet, data.Animals.Count);
             var animalCount = Math.Max(1, data.Animals.Count);
-            var summaryRow = FirstAnimalRow + animalCount;
-            FillAnimalRows(sheet, data.Animals, summaryRow);
+            var totalRow = FirstAnimalRow + animalCount;
+            FillAnimalRows(sheet, data.Animals, totalRow);
 
-            var tagDelta = ResizeEarTagRows(sheet, data.EarTags, animalDelta);
-            FillEarTagRows(sheet, data.EarTags, animalDelta);
+            // The ear-tag block is independently sized. Eight tags fit per row.
+            var earTagTitle = EarTagTitleRow + animalDelta;
+            sheet.Cell(earTagTitle, 1).Value = "پلاک گوش دام ارسالی";
+            var tagDelta = ResizeEarTagRows(sheet, data.EarTags.Count, animalDelta);
+            var tagRows = Math.Max(1, (int)Math.Ceiling(data.EarTags.Count / 8d));
+            var firstTagRow = FirstEarTagRow + animalDelta;
+            FillEarTagRows(sheet, data.EarTags, firstTagRow, tagRows);
 
-            var obligationsTitleRow = TemplateObligationsTitleRow + animalDelta + tagDelta;
-            FillObligations(sheet, obligationsTitleRow);
+            var totalDelta = animalDelta + tagDelta;
+            var obligationsTitle = ObligationsTitleRow + totalDelta;
+            FillObligations(sheet, obligationsTitle);
 
-            var signatureRow = TemplateSignatureRow + animalDelta + tagDelta;
-            // Preserve the signature cells and their merged layout from the template.
+            var spacerRow = SignatureRow - 1 + totalDelta;
+            var signatureRow = SignatureRow + totalDelta;
+            var lastRow = LastTemplateRow + totalDelta;
+
+            // Preserve the signature and footer rows from the reference workbook.
             sheet.Cell(signatureRow, 1).Value = "امضاء خریدار";
             sheet.Cell(signatureRow, 5).Value = "امضاء فروشنده";
-
-            var lastRow = TemplateLastRow + animalDelta + tagDelta;
-            ConfigurePrintLayout(sheet, lastRow);
+            ConfigureTypography(sheet, lastRow, totalRow, firstTagRow, tagRows,
+                earTagTitle, obligationsTitle);
+            ConfigurePrintLayout(sheet, lastRow, spacerRow);
 
             workbook.SaveAs(excelPath);
         }
@@ -98,108 +108,102 @@ public sealed class ExcelContractService
         sheet.Cell("G4").Value = data.Address;
     }
 
-    // Returns the number of rows inserted (positive) or deleted (negative).
     private static int ResizeAnimalRows(IXLWorksheet sheet, int requestedCount)
     {
         var count = Math.Max(1, requestedCount);
         var delta = count - TemplateAnimalRows;
-        var summaryRow = FirstAnimalRow + TemplateAnimalRows;
+        var originalTotalRow = FirstAnimalRow + TemplateAnimalRows;
 
         if (delta < 0)
         {
-            sheet.Rows(FirstAnimalRow + count, summaryRow - 1).Delete();
+            sheet.Rows(FirstAnimalRow + count, originalTotalRow - 1).Delete();
         }
         else if (delta > 0)
         {
-            sheet.Row(summaryRow).InsertRowsAbove(delta);
+            var sourceRow = originalTotalRow - 1;
+            sheet.Row(originalTotalRow).InsertRowsAbove(delta);
 
-            // The original last animal row is the formatting prototype.
-            for (var row = summaryRow; row < summaryRow + delta; row++)
+            for (var row = originalTotalRow; row < originalTotalRow + delta; row++)
             {
-                sheet.Row(FirstAnimalRow + TemplateAnimalRows - 1).CopyTo(sheet.Row(row));
+                sheet.Row(sourceRow).CopyTo(sheet.Row(row));
                 sheet.Row(row).Clear(XLClearOptions.Contents);
-                sheet.Cell(row, 1).Style = sheet.Cell(FirstAnimalRow + TemplateAnimalRows - 1, 1).Style;
-                EnsureAnimalTotalMerge(sheet, row);
-                sheet.Row(row).Height = sheet.Row(FirstAnimalRow + TemplateAnimalRows - 1).Height;
+                EnsureTotalCellMerge(sheet, row);
+                sheet.Row(row).Height = sheet.Row(sourceRow).Height;
             }
         }
 
         return delta;
     }
 
-    private static void EnsureAnimalTotalMerge(IXLWorksheet sheet, int row)
+    private static void EnsureTotalCellMerge(IXLWorksheet sheet, int row)
     {
-        var exists = sheet.MergedRanges.Any(r =>
-            r.RangeAddress.FirstAddress.RowNumber == row &&
-            r.RangeAddress.FirstAddress.ColumnNumber == 7 &&
-            r.RangeAddress.LastAddress.ColumnNumber == 8);
-        if (!exists)
+        var merged = sheet.MergedRanges.Any(range =>
+            range.RangeAddress.FirstAddress.RowNumber == row &&
+            range.RangeAddress.FirstAddress.ColumnNumber == 7 &&
+            range.RangeAddress.LastAddress.ColumnNumber == 8);
+
+        if (!merged)
             sheet.Range(row, 7, row, 8).Merge();
     }
 
     private static void FillAnimalRows(
-        IXLWorksheet sheet,
-        IReadOnlyList<AnimalLine> animals,
-        int summaryRow)
+        IXLWorksheet sheet, IReadOnlyList<AnimalLine> animals, int totalRow)
     {
         var count = Math.Max(1, animals.Count);
 
-        for (var i = 0; i < count; i++)
+        for (var index = 0; index < count; index++)
         {
-            var row = FirstAnimalRow + i;
-            sheet.Cell(row, 1).Value = i + 1;
+            var row = FirstAnimalRow + index;
+            sheet.Cell(row, 1).Value = index + 1;
 
-            if (i >= animals.Count)
+            if (index >= animals.Count)
             {
-                for (var col = 2; col <= 6; col++)
-                    sheet.Cell(row, col).Clear(XLClearOptions.Contents);
+                for (var column = 2; column <= 6; column++)
+                    sheet.Cell(row, column).Clear(XLClearOptions.Contents);
+                sheet.Cell(row, 7).FormulaA1 = string.Empty;
                 continue;
             }
 
-            var animal = animals[i];
+            var animal = animals[index];
             sheet.Cell(row, 2).Value = animal.Count;
             sheet.Cell(row, 3).Value = animal.Weight;
             sheet.Cell(row, 4).Value = animal.AnimalType;
             sheet.Cell(row, 5).Value = animal.Breed;
             sheet.Cell(row, 6).Value = animal.UnitPrice;
-            sheet.Cell(row, 7).FormulaA1 = $"=B{row}*F{row}";
+            sheet.Cell(row, 7).FormulaA1 = $"=IF(OR(B{row}=\"\",F{row}=\"\"),\"\",B{row}*F{row})";
             sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
             sheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
         }
 
-        sheet.Cell(summaryRow, 1).Value = "جمع کل:";
-        sheet.Cell(summaryRow, 7).FormulaA1 =
-            $"=SUM(G{FirstAnimalRow}:G{summaryRow - 1})";
-        sheet.Cell(summaryRow, 7).Style.NumberFormat.Format = "#,##0";
+        sheet.Cell(totalRow, 1).Value = "جمع کل:";
+        sheet.Cell(totalRow, 7).FormulaA1 =
+            $"=SUM(G{FirstAnimalRow}:G{totalRow - 1})";
+        sheet.Cell(totalRow, 7).Style.NumberFormat.Format = "#,##0";
     }
 
-    // Ear tags use the template's 8-column grid: 8 tags per row.
-    // Returns the number of rows inserted (positive) or deleted (negative).
-    private static int ResizeEarTagRows(
-        IXLWorksheet sheet,
-        IReadOnlyList<string> tags,
-        int animalDelta)
+    // Ear-tag template rows 20-24 contain eight cells per row.
+    private static int ResizeEarTagRows(IXLWorksheet sheet, int tagCount, int animalDelta)
     {
-        var neededRows = Math.Max(1, (int)Math.Ceiling(tags.Count / 8d));
-        var firstTagRow = FirstEarTagRow + animalDelta;
-        var currentRowsEnd = firstTagRow + TemplateEarTagRows - 1;
+        var neededRows = Math.Max(1, (int)Math.Ceiling(tagCount / 8d));
+        var firstRow = FirstEarTagRow + animalDelta;
+        var currentLastRow = firstRow + TemplateEarTagRows - 1;
         var delta = neededRows - TemplateEarTagRows;
 
         if (delta < 0)
         {
-            sheet.Rows(firstTagRow + neededRows, currentRowsEnd).Delete();
+            sheet.Rows(firstRow + neededRows, currentLastRow).Delete();
         }
         else if (delta > 0)
         {
-            var insertAt = currentRowsEnd + 1;
-            var prototypeRow = currentRowsEnd;
+            var insertAt = currentLastRow + 1;
+            var sourceRow = currentLastRow;
             sheet.Row(insertAt).InsertRowsAbove(delta);
 
             for (var row = insertAt; row < insertAt + delta; row++)
             {
-                sheet.Row(prototypeRow).CopyTo(sheet.Row(row));
+                sheet.Row(sourceRow).CopyTo(sheet.Row(row));
                 sheet.Row(row).Clear(XLClearOptions.Contents);
-                sheet.Row(row).Height = sheet.Row(prototypeRow).Height;
+                sheet.Row(row).Height = sheet.Row(sourceRow).Height;
             }
         }
 
@@ -207,53 +211,99 @@ public sealed class ExcelContractService
     }
 
     private static void FillEarTagRows(
-        IXLWorksheet sheet,
-        IReadOnlyList<string> tags,
-        int animalDelta)
+        IXLWorksheet sheet, IReadOnlyList<string> tags, int firstRow, int rowCount)
     {
-        var neededRows = Math.Max(1, (int)Math.Ceiling(tags.Count / 8d));
-        var firstRow = FirstEarTagRow + animalDelta;
-
-        for (var rowOffset = 0; rowOffset < neededRows; rowOffset++)
+        for (var offset = 0; offset < rowCount; offset++)
         {
-            var row = firstRow + rowOffset;
-            for (var col = 1; col <= 8; col++)
-                sheet.Cell(row, col).Clear(XLClearOptions.Contents);
+            var row = firstRow + offset;
+            for (var column = 1; column <= 8; column++)
+                sheet.Cell(row, column).Clear(XLClearOptions.Contents);
         }
 
-        for (var i = 0; i < tags.Count; i++)
+        for (var index = 0; index < tags.Count; index++)
         {
-            var row = firstRow + i / 8;
-            var col = 1 + i % 8;
-            sheet.Cell(row, col).Value = tags[i];
-            sheet.Cell(row, col).Style.Font.FontName = "B Yekan";
+            var row = firstRow + index / 8;
+            var column = 1 + index % 8;
+            sheet.Cell(row, column).Value = tags[index];
         }
     }
 
-    // Keep the obligations area as the template's original single merged body row.
-    // Do not merge several worksheet rows: doing so was a source of PDF layout drift.
     private static void FillObligations(IXLWorksheet sheet, int titleRow)
     {
         var bodyRow = titleRow + 1;
-
         sheet.Cell(titleRow, 1).Value = ContractText.ObligationsTitle;
-        sheet.Cell(titleRow, 1).Style.Font.Bold = true;
-        sheet.Cell(titleRow, 1).Style.Font.FontName = "B Nazanin";
-        sheet.Cell(titleRow, 1).Style.Alignment.Horizontal =
-            XLAlignmentHorizontalValues.Right;
-
         sheet.Cell(bodyRow, 1).Value = ContractText.ObligationsBody;
+
         var body = sheet.Cell(bodyRow, 1);
-        body.Style.Font.FontName = "B Nazanin";
-        body.Style.Font.FontSize = 11;
         body.Style.Alignment.WrapText = true;
+        body.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         body.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        body.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-        // Keep the original template row height, avoiding an oversized merged block.
+        body.Style.Font.FontName = "B Nazanin";
+        body.Style.Font.FontSize = 14;
     }
 
-    private static void ConfigurePrintLayout(IXLWorksheet sheet, int lastRow)
+    private static void ConfigureTypography(
+        IXLWorksheet sheet, int lastRow, int totalRow, int firstTagRow, int tagRows,
+        int tagTitleRow, int obligationsTitleRow)
     {
+        var all = sheet.Range(1, 1, lastRow, 8);
+        all.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        all.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        all.Style.Font.FontName = "B Nazanin";
+        all.Style.Font.FontSize = 14;
+
+        // Numeric content uses B Yekan and a readable size.
+        sheet.Range(7, 1, totalRow, 1).Style.Font.FontName = "B Yekan";
+        sheet.Range(7, 1, totalRow, 1).Style.Font.FontSize = 12;
+        sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontName = "B Yekan";
+        sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontSize = 12;
+        sheet.Range(7, 6, totalRow, 7).Style.Font.FontName = "B Yekan";
+        sheet.Range(7, 6, totalRow, 7).Style.Font.FontSize = 12;
+        sheet.Cell("C3").Style.Font.FontName = "B Yekan";
+        sheet.Cell("C4").Style.Font.FontName = "B Yekan";
+
+        if (tagRows > 0)
+        {
+            var tags = sheet.Range(firstTagRow, 1, firstTagRow + tagRows - 1, 8);
+            tags.Style.Font.FontName = "B Yekan";
+            tags.Style.Font.FontSize = 12;
+        }
+
+        sheet.Row(6).Style.Font.FontName = "B Nazanin";
+        sheet.Row(6).Style.Font.FontSize = 14;
+        sheet.Row(6).Style.Font.Bold = true;
+        sheet.Row(tagTitleRow).Style.Font.FontName = "B Nazanin";
+        sheet.Row(tagTitleRow).Style.Font.FontSize = 16;
+        sheet.Row(tagTitleRow).Style.Font.Bold = true;
+        sheet.Row(obligationsTitleRow).Style.Font.FontName = "B Nazanin";
+        sheet.Row(obligationsTitleRow).Style.Font.FontSize = 16;
+        sheet.Row(obligationsTitleRow).Style.Font.Bold = true;
+        sheet.Row(obligationsTitleRow + 1).Style.Font.FontName = "B Nazanin";
+        sheet.Row(obligationsTitleRow + 1).Style.Font.FontSize = 14;
+    }
+
+    private static void ConfigurePrintLayout(IXLWorksheet sheet, int lastRow, int spacerRow)
+    {
+        const double marginInPoints = 18d; // 0.25 inch
+        const double safetySpace = 18d;
+        const double minimumSpacerHeight = 15d;
+
+        // Stretch the blank row immediately above the signature block. This anchors
+        // signatures and the address/footer at the bottom of A4 when content is short.
+        double occupiedHeight = 0;
+        for (var row = 1; row <= lastRow; row++)
+        {
+            if (row == spacerRow)
+                continue;
+
+            var height = sheet.Row(row).Height;
+            occupiedHeight += height > 0 ? height : DefaultRowHeight;
+        }
+
+        var printableHeight = A4HeightPoints - (2 * marginInPoints) - safetySpace;
+        sheet.Row(spacerRow).Height =
+            Math.Max(minimumSpacerHeight, printableHeight - occupiedHeight);
+
         sheet.PageSetup.PrintAreas.Clear();
         sheet.PageSetup.PrintAreas.Add($"A1:H{lastRow}");
         sheet.PageSetup.PageOrientation = XLPageOrientation.Portrait;
@@ -264,6 +314,8 @@ public sealed class ExcelContractService
         sheet.PageSetup.Margins.Bottom = 0.25;
         sheet.PageSetup.Margins.Left = 0.25;
         sheet.PageSetup.Margins.Right = 0.25;
+        sheet.PageSetup.CenterHorizontally = true;
+        sheet.PageSetup.CenterVertically = false;
     }
 
     private static string MakeSafeFileName(string value)
@@ -307,7 +359,6 @@ internal static class ExcelPdfExporter
             workbook.ForceFullCalculation = true;
             excel.CalculateFullRebuild();
 
-            // Export only the contract sheet and force a single portrait A4 page.
             contractSheet = workbook.Worksheets("قرارداد فروش دام");
             pageSetup = contractSheet.PageSetup;
             pageSetup.PaperSize = 9; // xlPaperA4
@@ -315,6 +366,9 @@ internal static class ExcelPdfExporter
             pageSetup.Zoom = false;
             pageSetup.FitToPagesWide = 1;
             pageSetup.FitToPagesTall = 1;
+            pageSetup.CenterHorizontally = true;
+            pageSetup.CenterVertically = false;
+            pageSetup.PrintArea = contractSheet.PageSetup.PrintArea;
             contractSheet.ExportAsFixedFormat(0, pdfPath);
 
             workbook.Close(false);
