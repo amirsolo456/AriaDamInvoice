@@ -107,7 +107,7 @@ public sealed class ExcelContractService
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = "explorer.exe",
-                    Arguments = $"/select,\\"{pdfPath}\\"",
+                    Arguments = $"/select,\"{pdfPath}\"",
                     UseShellExecute = true
                 });
             }
