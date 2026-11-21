@@ -41,7 +41,7 @@ public sealed class ExcelContractService
 
         var buyer = MakeSafeFileName(string.IsNullOrWhiteSpace(data.BuyerName)
             ? "بدون نام" : data.BuyerName);
-        var baseName = $"{data.ContractDate.Replace('/', '-')}_{buyer}";
+        var baseName = $"{data.DocumentNumber}_{data.ContractDate.Replace('/', '-')}_{buyer}";
         var excelPath = GetUniquePath(outputDirectory, baseName, ".xlsx");
         var pdfPath = Path.ChangeExtension(excelPath, ".pdf");
 
