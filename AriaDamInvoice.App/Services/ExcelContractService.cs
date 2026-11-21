@@ -34,8 +34,17 @@ public sealed class ExcelContractService
         var excelPath = GetUniquePath(outputDirectory, baseName, ".xlsx");
         var pdfPath = Path.ChangeExtension(excelPath, ".pdf");
 
-        using (var workbook = new XLWorkbook(_templatePath))
+        using (var templateStream = new FileStream(
+                   _templatePath,
+                   FileMode.Open,
+                   FileAccess.Read,
+                   FileShare.ReadWrite | FileShare.Delete))
+        using (var templateMemory = new MemoryStream())
         {
+            templateStream.CopyTo(templateMemory);
+            templateMemory.Position = 0;
+
+            using var workbook = new XLWorkbook(templateMemory);
             var sheet = workbook.Worksheet("قرارداد فروش دام");
             FillBuyerDetails(sheet, data);
             var summaryRow = ResizeAnimalRows(sheet, data.Animals.Count);
