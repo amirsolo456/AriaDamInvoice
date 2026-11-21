@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using ClosedXML.Excel;
 using AriaDamInvoice.Models;
 using System.IO;
+using System.Diagnostics;
 
 namespace AriaDamInvoice.Services;
 
@@ -68,6 +69,14 @@ public sealed class ExcelContractService
         }
 
         ExcelPdfExporter.ExportWorkbook(excelPath, pdfPath);
+
+        // Open the generated PDF with the user's default PDF viewer.
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = pdfPath,
+            UseShellExecute = true
+        });
+
         return (excelPath, pdfPath);
     }
 
