@@ -16,8 +16,12 @@
             <TextBlock Text="مدیریت قراردادها" FontSize="14" Margin="0,5,0,0"
                        Foreground="{StaticResource MutedBrush}"/>
         </StackPanel>
-        <Border Grid.Row="1" Background="White" CornerRadius="14" Padding="24"
-                BorderBrush="#E2E8F0" BorderThickness="1">
+        <Border Grid.Row="1" Background="White" CornerRadius="16" Padding="24"
+                BorderBrush="#DFE7E5" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect Color="#243B35" Opacity="0.08" BlurRadius="22"
+                                  ShadowDepth="3" Direction="270"/>
+            </Border.Effect>
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <Grid>
                     <Grid x:Name="SetupPanel" Visibility="Collapsed" VerticalAlignment="Center"
