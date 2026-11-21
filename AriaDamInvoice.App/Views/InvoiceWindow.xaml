@@ -72,13 +72,7 @@
                         <TextBlock x:Name="EarTagCountText" Text="تعداد پلاک: ۰" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0"/>
                     </StackPanel>
                 </Border>
-                <Border Background="White" CornerRadius="10" Padding="14">
-                    <StackPanel>
-                        <TextBlock Text="توضیحات قرارداد" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"/>
-                        <TextBox x:Name="NotesTextBox" MinHeight="80" AcceptsReturn="True" TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto" Padding="8" Margin="0,8,0,0"/>
-                    </StackPanel>
-                </Border>
+
             </StackPanel>
         </ScrollViewer>
         <DockPanel Grid.Row="2" Margin="0,14,0,0">
