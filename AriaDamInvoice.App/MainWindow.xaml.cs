@@ -30,10 +30,11 @@ public partial class MainWindow : Window
     {
         DashboardPanel.Visibility = Visibility.Collapsed;
         SetupPanel.Visibility = Visibility.Visible;
-        SelectedFolderText.Text = string.Empty;
-        SelectedTemplateText.Text = string.Empty;
-        SaveFolderButton.IsEnabled = false;
-        _selectedFolder = string.Empty;
+        _selectedFolder = Directory.Exists(_settings.OutputDirectory) ? _settings.OutputDirectory : string.Empty;
+        _selectedTemplate = File.Exists(_settings.TemplateFilePath) ? _settings.TemplateFilePath : string.Empty;
+        SelectedFolderText.Text = _selectedFolder;
+        SelectedTemplateText.Text = _selectedTemplate;
+        UpdateSetupSaveButton();
     }
 
     private void ShowDashboard()
@@ -121,6 +122,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        _settings.TemplateFilePath = _selectedTemplate;
         SaveSelectedFolderAndShowDashboard();
     }
 
@@ -137,7 +139,6 @@ public partial class MainWindow : Window
         try
         {
             _settings.OutputDirectory = _selectedFolder;
-            _settings.TemplateFilePath = _selectedTemplate;
             _settingsService.Save(_settings);
             ShowDashboard();
         }
