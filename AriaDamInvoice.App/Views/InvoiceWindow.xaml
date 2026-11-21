@@ -17,7 +17,7 @@
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="FontFamily" Value="B Nazanin"/>
             <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Padding" Value="9,6"/>
+            <Setter Property="Padding" Value="9,0"/>
             <Setter Property="Height" Value="44"/>
             <Setter Property="MinHeight" Value="44"/>
             <Setter Property="Foreground" Value="#172B27"/>
@@ -34,7 +34,7 @@
                                 CornerRadius="7" SnapsToDevicePixels="True">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                          VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocused" Value="True">
@@ -120,7 +120,7 @@
                                 </Grid>
                             </Border>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="4"><TextBlock Text="تاریخ قرارداد (شمسی)"/><TextBox x:Name="ContractDateTextBox" Margin="0,6,0,0" Padding="7" FontFamily="B Yekan" Foreground="Black" FlowDirection="LeftToRight" TextAlignment="Center" ToolTip="مثال: ۱۴۰۵/۰۸/۳۰"/><TextBlock Text="فرمت: سال/ماه/روز" FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0"/></StackPanel>
+                        <StackPanel Grid.Column="1" Margin="4"><TextBlock Text="تاریخ قرارداد (شمسی)"/><TextBox x:Name="ContractDateTextBox" Margin="0,6,0,0" Padding="9,0" FontFamily="B Yekan" FontSize="16" Foreground="Black" FlowDirection="LeftToRight" TextAlignment="Center" VerticalContentAlignment="Center" ToolTip="مثال: ۱۴۰۵/۰۸/۳۰"/><TextBlock Text="فرمت: سال/ماه/روز" FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0"/></StackPanel>
                         <StackPanel Grid.Column="2" Margin="4"><TextBlock Text="نام خریدار"/><TextBox x:Name="BuyerNameTextBox" Margin="0,6,0,0" Padding="7" Foreground="Black"/></StackPanel>
                         <StackPanel Grid.Column="3" Margin="4"><TextBlock Text="تلفن"/><TextBox x:Name="PhoneTextBox" Margin="0,6,0,0" Padding="7" FontFamily="B Yekan" Foreground="Black"/></StackPanel>
                         <StackPanel Grid.Column="4" Margin="4"><TextBlock Text="آدرس"/><TextBox x:Name="AddressTextBox" Margin="0,6,0,0" Padding="7" Foreground="Black"/></StackPanel>
