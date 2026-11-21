@@ -7,13 +7,11 @@
         FlowDirection="RightToLeft" Background="{StaticResource PageBrush}" TextElement.FontFamily="B Nazanin">
     <Window.Resources>
         <helpers:ThousandsSeparatorConverter x:Key="ThousandsSeparatorConverter"/>
-        <Style TargetType="{x:Type Button}">
+        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="FontFamily" Value="B Nazanin"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="Padding" Value="14,7"/>
-            <Setter Property="MinHeight" Value="36"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="MinHeight" Value="38"/>
             <Setter Property="Margin" Value="3"/>
         </Style>
         <Style TargetType="{x:Type TextBox}">
