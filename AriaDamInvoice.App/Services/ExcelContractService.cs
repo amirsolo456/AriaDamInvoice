@@ -280,7 +280,7 @@ public sealed class ExcelContractService
             sheet.Cell(row, 5).Value = animal.Breed;
             sheet.Cell(row, 6).Value = animal.UnitPrice;
             sheet.Cell(row, 7).FormulaA1 = $"=IF(OR(B{row}=\"\",F{row}=\"\"),\"\",B{row}*F{row})";
-                        sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
+            sheet.Cell(row, 6).Style.NumberFormat.Format = "#,##0";
             sheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
         }
 
@@ -364,11 +364,11 @@ public sealed class ExcelContractService
 
         // Numeric content uses B Yekan and a readable size.
         sheet.Range(FirstAnimalRow, 1, totalRow - 1, 1).Style.Font.FontName = "B Yekan";
-        sheet.Range(7, 1, totalRow - 1, 1).Style.Font.FontSize = 12;
+        sheet.Range(FirstAnimalRow, 1, totalRow - 1, 1).Style.Font.FontSize = 12;
         sheet.Range(FirstAnimalRow, 2, totalRow - 1, 3).Style.Font.FontName = "B Yekan";
-        sheet.Range(7, 2, totalRow - 1, 3).Style.Font.FontSize = 12;
+        sheet.Range(FirstAnimalRow, 2, totalRow - 1, 3).Style.Font.FontSize = 12;
         sheet.Range(FirstAnimalRow, 6, totalRow, 7).Style.Font.FontName = "B Yekan";
-        sheet.Range(7, 6, totalRow, 7).Style.Font.FontSize = 12;
+        sheet.Range(FirstAnimalRow, 6, totalRow, 7).Style.Font.FontSize = 12;
         sheet.Cell("C5").Style.Font.FontName = "B Yekan";
         sheet.Cell("C4").Style.Font.FontName = "B Yekan";
 
@@ -380,8 +380,8 @@ public sealed class ExcelContractService
         }
 
         sheet.Row(7).Style.Font.FontName = "B Nazanin";
-        sheet.Row(6).Style.Font.FontSize = 14;
-        sheet.Row(6).Style.Font.Bold = true;
+        sheet.Row(7).Style.Font.FontSize = 14;
+        sheet.Row(7).Style.Font.Bold = true;
         sheet.Row(tagTitleRow).Style.Font.FontName = "B Nazanin";
         sheet.Row(tagTitleRow).Style.Font.FontSize = 16;
         sheet.Row(tagTitleRow).Style.Font.Bold = true;
