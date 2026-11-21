@@ -35,6 +35,8 @@ public partial class InvoiceWindow : Window
 
         DataContext = this;
         ContractDateTextBox.Text = FormatPersianDate(DateTime.Today);
+        if (_settings.NextDocumentNumber < 1000) _settings.NextDocumentNumber = 1000;
+        DocumentNumberTextBox.Text = _settings.NextDocumentNumber.ToString(CultureInfo.InvariantCulture);
         AnimalsGrid.ItemsSource = _animals;
         AddAnimalRow();
         EarTagsTextBox.TextChanged += (_, _) => UpdateEarTagCount();
@@ -64,6 +66,13 @@ public partial class InvoiceWindow : Window
         }
 
         return new string(chars);
+    }
+
+    private bool TryGetDocumentNumber(out int documentNumber)
+    {
+        var normalized = NormalizeDigits(DocumentNumberTextBox.Text);
+        return int.TryParse(normalized, NumberStyles.None, CultureInfo.InvariantCulture, out documentNumber)
+               && documentNumber >= 1;
     }
 
     private bool TryGetContractDate(out DateTime gregorianDate)
@@ -236,6 +245,15 @@ public partial class InvoiceWindow : Window
 
     private void Save_Click(object sender, RoutedEventArgs e)
     {
+        if (!TryGetDocumentNumber(out var documentNumber))
+        {
+            MessageBox.Show("شماره سند باید یک عدد صحیح مثبت باشد.", "بررسی شماره سند",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            DocumentNumberTextBox.Focus();
+            DocumentNumberTextBox.SelectAll();
+            return;
+        }
+
         if (!TryGetContractDate(out var contractDate))
         {
             MessageBox.Show(
@@ -281,6 +299,7 @@ public partial class InvoiceWindow : Window
             var data = new InvoiceData
             {
                 ContractDate = FormatPersianDate(contractDate),
+                DocumentNumber = documentNumber,
                 BuyerName = BuyerNameTextBox.Text.Trim(),
                 Phone = PhoneTextBox.Text.Trim(),
                 Address = AddressTextBox.Text.Trim(),
@@ -290,6 +309,9 @@ public partial class InvoiceWindow : Window
 
             var service = new ExcelContractService(_settings.TemplateFilePath);
             var result = service.Create(data, _settings.OutputDirectory);
+
+            _settings.NextDocumentNumber = checked(documentNumber + 1);
+            _settingsService.Save(_settings);
 
             MessageBox.Show(
                 $"قرارداد با موفقیت ذخیره شد.\n\nفایل اکسل:\n{result.ExcelPath}\n\nفایل PDF:\n{result.PdfPath}",
